@@ -1,0 +1,113 @@
+使用print输出各型的
+字符串
+整数
+浮点数
+精度控制
+
+一般使用是这样的：
+>>>strA = '你好，孤荷凌寒' 
+
+>>>print(strA)
+
+你好，孤荷凌寒
+
+#直接格式化字符串
+1.格式化输出（具体说明我的手写笔记上的图示比较清楚）
+python print也支持参数格式化，与C言的printf似，
+例：
+>>>strB = "字符串：(%s) 的长度是 %d 个字。" %('孤荷凌寒的QQ号码是：578652607',len('孤荷凌寒的QQ号码是：578652607'))
+>>>print(strB)
+字符串：(孤荷凌寒的QQ号码是：578652607) 的长度是 20 个字。
+
+2.格式化输出16制整数
+
+nHex = 0x20
+
+%x --- hex 十六进制
+
+%d --- dec 十进制
+
+%d --- oct 八进制
+
+ 例：
+
+>>>print("nHex = %x,nDec = %d,nOct = %o" %(nHex,nHex,nHex))
+nHex = 20,nDec = 32,nOct = 40
+
+#使用整数的各种进制打印同一个数
+如果需要输出二进制的话，可以使用python函数 bin()
+>>> bin(789)
+'0b1100010101'
+
+3.格式化输出浮点数(float)（具体说明我的手写笔记上的图示比较清楚）
+
+import math
+#输出为浮点数
+>>>print("PI = %f" % math.pi)
+#字符填充宽度 = 10,小数位数长度 = 3,对齐方式= 左对齐
+>>>print("PI = %10.3f" % math.pi)
+#字符填充宽度 = 10, 小数位数长度 = 3,对齐方式 = 右对齐
+>>>print("PI = %-10.3f" % math.pi)
+
+#前面填充字符0
+>>>print("PI = %06d" % int(math.pi))
+PI = 3.141593
+PI =      3.142
+PI = 3.142
+PI = 000003
+
+4.格式化输出字符串(string) （具体说明我的手写笔记上的图示比较清楚）
+#字符串长度 = 3
+Print("%.3s " % ("abcdef"))
+#字符串长度 = 4
+Print("%.*s" % (4,"abcdef"))
+#字符填充宽度 = 10,字符串长度 = 3
+Print("%10.3s" % ("abcdef"))
+#输出结果：
+#abc
+#abcd
+#       abc
+
+5.输出列表(list)
+
+>>>l = [1,2,3,4,'jcodeer']
+>>>print(l)
+[1, 2, 3, 4, 'jcodeer']
+
+#于list直接打印即可
+5.python print自动换行
+print 会自动在行末加上回车,如果不需回车，只需在print语句的结尾添加一个逗号【,】，就可以改变它的行为。
+for i in range(0,5):
+
+    print(i,)
+或直接使用下面的函数进行输出：
+sys.stdout.write("输出的字串")
+
+7. 万能的 %r
+%r是一个万能的格式符，它会将后面给的参数原样打印出来，带有类型信息。
+python print %r 案例
+
+formatter = "%r %r %r %r"
+print(formatter % (1, 2, 3, 4))
+print(formatter % ("one", "two", "three", "four"))
+print(formatter % (True, False, False, True))
+print(formatter % (formatter, formatter, formatter, formatter))
+print(formatter % (
+"孤荷凌寒热爱编程，",
+"认为编程是世界上最有意思的事情。",
+ "但是这很苦，",
+ "还是坚持下来了。"
+ ))
+输出结果：
+$ python ghlh.py
+1 2 3 4
+'one' 'two' 'three' 'four'
+True False False True
+'%r %r %r %r' '%r %r %r %r' '%r %r %r %r' '%r %r %r %r'
+'孤荷凌寒热爱编程，' '认为编程是世界上最有意思的事情。' "但是这很苦，" '还是坚持下来了。'
+
+欢迎联系我加入倡导终身学习终身成长的社群——
+就是要学  社群  www.941xue.com/index.aspx
+ 
+原文地址：http://www.941xue.com/content.aspx?id=148
+B站视频：https://www.bilibili.com/video/BV1mt411m7MH/

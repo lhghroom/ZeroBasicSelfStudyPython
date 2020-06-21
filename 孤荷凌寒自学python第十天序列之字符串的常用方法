@@ -1,0 +1,168 @@
+Python的字符串操作方法非常丰富，原生支持字符串的多种操作：
+1 查找子字符串
+string.find(str,[beg=0],[end=len(string)])
+从字符串string中寻找str，可以指定从string的beg位置起开始找，直到string的end位置结束寻找。
+参数beg和end是可选参数，如果不指定那么，默认从string的最开头，即index为0的位置开始找，直到string整个字符串都找完。
+Str可以是单个字符，也可以是一个字符串。
+此方法会返回一个int类型的对象值。表示str这个字符串的第一个字符位于string字符串中的index值。
+例：
+>>> strLong='孤荷凌寒的QQ号是：578652607'
+>>> strShort='QQ'
+>>> print(strLong.find(strShort))   #从strLong中寻找strShort，没有指定从strLong的起始index和结束index中去找，则默认寻找strLong的全部字符。
+5
+   #返回值5表示strShort代表的值’QQ’在strLong 的index值的第5位开始。
+>>> intTemp=strLong.find(strShort,4)    #从strLong中寻找strShort，这一次指定了从strLong的index值为4的字符开始往后寻找，直到最后。
+>>> print(intTemp)
+5
+   #返回值仍然是5！！！表示strShort代表的值’QQ’在strLong 的index值的第5位开始。
+>>> intTemp=strLong.find(strShort,6)    #从strLong中寻找strShort，这一次指定了从strLong的index值为6的字符开始往后寻找，但因为从第6位字符开找是找不到的。
+>>> print(intTemp)
+-1
+   #返回值是-1。表示是没有找到的。
+>>> intTemp=strLong.find(strShort,2,8)    #从strLong中寻找strShort，这一次指定了从strLong的index值为4的字符开始往后寻找，也指定了要一直找到strLong的index值为8的字符处为止。
+>>> print(intTemp)
+5
+#返回值仍然是5！！！表示strShort代表的值’QQ’在strLong 的index值的第5位开始。
+2 将列表等对象连接成字符串
+connetString.join(obj)
+此处的连接成字符串是指将如列表等中的多个元素合并成一个字符串。而不是指将两个字符串连接起来。
+connectString指的是连接字符或连接字符串，意思是要用哪个符号来间隔列表中的多个元素，使其作为连接字符将列表中的多个元素合并成一个字符串。
+Obj是指如列表等需要合并其中元素为一个完整字符串的对象，可以为多种可以接受的对象。
+此方法将返回合并后的字符串对象。
+例：
+>>> strLst='孤荷凌寒小时候家里很穷。'
+>>> lstStr=list(strLst)
+>>> print(lstStr)
+['孤', '荷', '凌', '寒', '小', '时', '候', '家', '里', '很', '穷', '。']
+>>> strConnect="-"
+>>> strConnect.join(lstStr)   #特别注意这儿的写法，此join方法是由连接字符或连接字符串发出的方法。
+'孤-荷-凌-寒-小-时-候-家-里-很-穷-。'
+>>> strEnd=strConnect.join(lstStr)
+>>> print(strEnd)
+孤-荷-凌-寒-小-时-候-家-里-很-穷-。
+除了可以将列表的内容合并起来，其它非标准的序列也可以使用join方法。
+>>> objA='','我','是','自','学','Python','的','孤','荷','凌','寒',''
+>>> strConnect='=='
+>>> strResult=strConnect.join(objA)
+>>> print(strResult)
+==我==是==自==学==Python==的==孤==荷==凌==寒==
+3 将字符串的所有字符全部变成小写，只针对英文字符部分。
+string.lower()
+string是指要进行处理的字符串对象。
+此方法并不将改变string对象本身，而是返回一个改变后的新的字符串。
+例:
+>>> strLs='孤荷凌寒的QQ号码是578652607'
+>>> strResult=strLs.lower()
+>>> print(strLs)
+孤荷凌寒的QQ号码是578652607  #strLs本身的值并没有改变
+>>> print(strResult)
+孤荷凌寒的qq号码是578652607
+
+4 将字符串的所有字符全部变成大写，只针对英文字符部分。
+string.upper()
+string是指要进行处理的字符串对象。
+此方法并不将改变string对象本身，而是返回一个改变后的新的字符串。
+例:
+>>> strLs='孤荷凌寒的qq号码是578652607'
+>>> strResult=strLs.upper()
+>>> print(strLs)
+孤荷凌寒的qq号码是578652607  #strLs本身的值并没有改变
+>>> print(strResult)
+孤荷凌寒的QQ号码是578652607
+
+5 将字符串的所有英文字符进行大小写字母的反转，原来是大写字母的换成小写字母，原来是小写字母的，换成大写字母。
+string.swapcase()
+string是指要进行处理的字符串对象。
+此方法并不将改变string对象本身，而是返回一个改变后的新的字符串。
+例:
+>>> strLs='孤荷凌寒的qq号码是578652607,这是QQ号码哦。'
+>>> strResult=strLs.upper()
+>>> print(strLs)
+孤荷凌寒的qq号码是578652607,这是QQ号码哦。  #strLs本身的值并没有改变
+>>> print(strResult)
+孤荷凌寒的QQ号码是578652607,这是qq号码哦。
+6 查找并替换字符串中的子字符或子字符串
+String.replace(oldkey,newkey[,maxcount])
+String是指要进行查找并替换操作的长字符串。
+参数oldkey是指要查找的子字符串；
+参数newkey是指要将查找到的子字符串替换成的新字符串；
+可选参数maxcount是最多替换次数，是指如果在String中找到了多个oldkey，那么最多只替换前面maxcount个oldkey为newkey。
+此方法并不改变String的值，而是返回一个新的替换操作完成后的新字符串对象。
+例：
+>>> strLong='孤荷凌寒小时候家里很穷。孤荷凌寒小时候最大的心愿就是能够考个大学。但家里实在太穷，甚至没有钱上高中，孤荷凌寒后来初中毕业后只好读了中等师范学校。'
+>>> strOldKey='孤荷凌寒'
+>>> strNewKey='我'
+>>> strResult=strLong.replace(strOldKey,strNewKey,2) #本来有三个strOldKey,但只替换前面两个。
+>>> print(strLong)  #strLong本身的值并没有改变
+孤荷凌寒小时候家里很穷。孤荷凌寒小时候最大的心愿就是能够考个大学。但家里实在太穷，甚至没有钱上高中，孤荷凌寒后来初中毕业后只好读了中等师范学校。
+>>> print(strResult)
+我小时候家里很穷。我小时候最大的心愿就是能够考个大学。但家里实在太穷，甚至没有钱上高中，孤荷凌寒后来初中毕业后只好读了中等师范学校。
+
+7 将字符串按指定的分隔符号或分隔字符串切割开并成为列表。
+String.split([strCutCharOrString][,maxcount=string.count(String)])
+String是指要被切割的字符串。
+可选参数 strCutCharOrString 表示分隔标识字符或字符串，如果 不指定，默认为空格。
+可选参数 maxcount 表示最多切割几次，如果不指定，则默认在String中找到多少个strCutCharOrString就切割几次。
+本方法返回一个列表对象。
+例：
+>>> strLong='1997年9月，孤荷凌寒进入中等师范学校学习，中等师范学校在过去是专门培养小学老师的学校，与中专一样，学制三年，可惜当时中等师范学校是不教习英语与计算机的，也没有高深的数学课程。'
+>>> strCutChar='，'
+>>> intCutCount=5  #在strLong中本来有六个strCutChar,即中文逗号有六个,但只在前面五个地方进行切割。
+>>> lstResult=strLong.split(strCutChar,intCutCount)
+>>> print(lstResult)
+['1997年9月', '孤荷凌寒进入中等师范学校学习', '中等师范学校在过去是专门培养小学老师的学校', '与中专一样', '学制三年', '可惜当时中等师范学校是不教习英语与计算机的，也没有高深的数学课程。']
+
+8 删除一个字符串首和尾指定的字符
+String.strip([charOrChars])
+String是指要被删除首和尾指定字符的字符串。
+可选参数charOrChars是指要删除的处于字符串String首和尾的哪个字符或哪些字符。
+如果不指定charOrChars参数，则默认删除掉字符串String首和尾的空格字符。
+charOrChars参数可以只传入单个字符；
+charOrChars参数也可以传入一个字符串，则会将charOrChars参数字符串中的每一个字符都执行一次操作，而不是将charOrChars参数字符串整体执行一次操作。
+此方法不对原字符串String的值进行任何修改，而是返回一个新的去除了首尾指定字符后的新字符串对象。
+例：
+>>> strTemp='    孤 荷 凌 寒    '
+>>> strR=strTemp.strip()   #strip方法没有指定可选参数，则默认去除strTemp首尾的空格字符，注意并不会删除strTemp字符串中间的空格
+>>> print(strTemp)   #strTemp本身的值并没有被修改
+    孤 荷 凌 寒    
+>>> print(strR)
+孤 荷 凌 寒
+>>> print('---' + strTemp + '---')  #在前后加上’---’方便看首尾空格是否还存在。   #strTemp本身的值并没有被修改
+---    孤 荷 凌 寒    ---
+>>> print('---' + strR + '---')  #在前后加上’---’方便看首尾空格是否还存在。
+---孤 荷 凌 寒---
+>>> strTemp='1234孤1荷2凌3寒4321'
+>>> strR2=strTemp.strip('1')  #这一次strip方法传入了可选参数‘1’，是一个单个字符，则只会去除strTemp首尾的字符1，而不会删除strTemp字符串中间的字符1
+>>> strR3=strTemp.strip('1234')  #这一次strip方法传入了可选参数‘1234’，是一个字符串，并不是说将删除strTemp字符串首尾的‘1234’，而是会分别删除strTemp字符串首尾的‘1’，‘2’，‘3’，‘4’，从下面的输出结果中就可以看到，虽然strTemp字符串尾巴的字符串是：’4321’，在此次执行strip方法时也被删除了。
+>>> print(strTemp)   #strTemp本身的值并没有被修改
+1234孤1荷2凌3寒4321
+>>> print(strR2)
+234孤1荷2凌3寒432
+>>> print(strR3)
+孤1荷2凌3寒
+9 指定一个对照表，将字符串中符合对照表中其中一行任意一个或多个关键字的字符更换成另一行中的关键字字符。
+String.translate(table[,deletechars])
+String是指要进行字符替换操作的字符串。
+参数table是指一张二维字符对照表。
+可选参数deletechars，用法不明。
+此操作没有对原字符串String的内容作任何修改，
+将返回一个替换完成后的新字符串对象。
+例：
+>>> strRow1='一二三四五六七八九十'
+>>> strRow2='壹贰叁肆伍陆柒捌玖拾'
+>>> tableTemp=str.maketrans(strRow1,strRow2)  #将此表格的两行合并成一张二维对照表
+>>> print(tableTemp) #打印时，显示的是对照字符的 编码 对照
+{19968: 22777, 20108: 36144, 19977: 21441, 22235: 32902, 20116: 20237, 20845: 38470, 19971: 26578, 20843: 25420, 20061: 29590, 21313: 25342}
+>>> strLong='孤荷凌寒的QQ号是五七八六五二六零七'
+>>> strR=strLong.translate(tableTemp)
+>>> print(strLong) #原字符串strLong的值没有发生变化
+孤荷凌寒的QQ号是五七八六五二六零七
+>>> print(strR)
+孤荷凌寒的QQ号是伍柒捌陆伍贰陆零柒
+
+欢迎联系我加入倡导终身学习终身成长的社群——
+就是要学  社群  www.941xue.com/index.aspx
+ 
+原文地址：http://www.941xue.com/content.aspx?id=154
+B站视频：https://www.bilibili.com/video/BV1Tt411U7UN/
+

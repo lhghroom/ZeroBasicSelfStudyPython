@@ -1,0 +1,134 @@
+函数是能够完成指定运算并返回运算结果的代码块。是结构化编程重要的结构。
+我首先发现python的函数定义非常简洁，没有定义的修饰词，如多数语言中用到的函数定义的修饰词private public 等在python中是不存在！！
+一、	python函数的定义格式
+def 函数名([参数列表])：
+	函数体
+	就是函数内具体执行的代码块
+
+参数列表，是指函数的形式参数，简称为“形参”，一个函数可以没有形参，也可以有多个形参。
+多个形参之间用逗号分隔。
+python的函数的形参有以下几种可能：
+第一种：必须形参
+必须形参就是说，在调用这个函数时，必须给函数的这个形参指定一个实际的参数对象（称之为“实参”），否则函数无法执行指定的运算。所以称之为必须形参。
+第二种：可选形参
+可选形参与必须形参不同，当调用这个函数的时候，对于可选形参，可以给这个可选形参指定一个实际的参数对象（称之为“实参”），也可以不指定，都不会对函数的运算有任何影响。
+可选形参在定义时必须在形参名称后加上=号，并赋予默认值。
+第三种：可变形参
+这是python中非常独到的设计。这种函数的形参，在函数定义时只看到有一个形参，然而，这个形参却可以接收任意数量的实际参数。
+可变形参在函数定义时，必须在形参名之前添加一个*号。
+第四种：关键字参数
+也就是在调用函数时，先写形参名（或字典KEY名——这是针对可变参数的情况）然后加上等号再写上实际参数对象名，称之为关键字参数，通过关键字参数给函数的形参赋值指定实参，可以保证参数传递的一一对应，也方便阅读理解。
+在定义函数的关键字参数的形参时，在形参前必须标注两个半角*号。
+且函数的关键字参数也是属于可变形参的一种，特别用于接收字典类的对象实参。
+
+二、	函数的必须形参
+先测试如下：
+def func(var,var2):
+    return var + var2
+我定义了一个函数 ，函数名为：func
+此函数有两个形式参数：var  var2
+这两个形参都是函数 func 的 必须形参
+要调用func函数时，必须给这两个 必须形参 指定 对应的实际参数对象，否则，调用会失败，会出现错误提示。
+继续测试调用：
+def func(var,var2):
+    return var + var2
+intC=func() #这一次调用没有给两个 必须形参 指定实际参数对象（简称“实参”），会报错
+运行测试就会是下面的错误提示：
+TypeError: func() missing 2 required positional arguments: 'var' and 'var2'
+现在继续测试给两个 必须形参 指定实际参数对象，再测试：
+def func(var,var2):
+    return var + var2
+intA=24567
+intB=98765
+intC=func(intA,intB)
+print(intC)
+这次测试运算结果是函数调用成功，打印了正确运算结果：
+123332
+
+三、	函数的可选形参
+先修改上面的测试如下：
+def func(var,var2=100):
+    return var + var2
+上面的函数与之前的不同在于第二个形参var2被修改成了 可选形参，因为在定义此表参时，就给此形参进行了初始化默认值的赋值，即是说，在没有给可选形参传递 实际参数时，就会使用默认值100作为var2的值。
+继续测试如下：
+def func(var,var2=100):
+    return var + var2
+intA=24567
+intB=98765
+intC=func(intA,intB) #这一次调用函数 func 给可选形参 var2 指定了实际参数对象 intB
+print('intC=',intC)
+intD=func(intA) #这一次调用函数 func 没有给可选形参 var2 指定实际参数对象。则函数 func在运算时会使用var2的默认定义值100
+print('intD=',intD)
+执行结果 ：
+intC= 123332
+intD= 24667
+
+在其它编程语言中，调用函数时，可选形参可以以,,,,的形式跳过，但python中这种写法是不行的。
+
+四、	函数的可变形参
+先定义一个有可变形参的测试函数：
+def func(var,*var2):
+return var, '的信息有：',var2
+在上面的函数中，我给函数定义了一个可变形参 var2，可变形参的特征是，前面有一个半角*号。
+可变形参可以接收多个实际参数，下面继续测试：
+def func(var,*var2):
+return var, '的信息有：',var2
+strName='孤荷凌寒'
+strA='男'
+strB='37 years old'
+strC='175cm'
+strR1=func(strName,strB) #这一次调用函数 func 给可变形参 var2 指定了一个实际参数对象 strB
+print('strR1=',strR1)
+strR2=func(strName,strB,strC)  #这一次调用函数 func 给可变形参 var2 指定了两个实际参数对象  strB  strC
+print('strR2=',strR2)
+运算结果如下：
+strR1= ('孤荷凌寒', '的信息有：', ('37 years old',))
+strR2= ('孤荷凌寒', '的信息有：', ('37 years old', '175cm'))
+从运算结果中，我们可以看出，当给可变形数指定的多个 实际参数传递进入函数后，函数是将可变形参收到的多个实际参数作为 元组来处理的！
+那么其实调用函数时，给函数的可变形参 指定对应的实际参数时，可以直接传递一个元组对象作为可变形参的实际参数，我修改测试代码如下：
+def func(var,*var2):
+    return var, '的信息有：',var2
+strName='孤荷凌寒'
+strA='男'
+strB='37 years old'
+strC='175cm'
+tplA=(strA,strB,strC)
+strR3=func(strName,*tplA) #当直接将元组对象作为函数可变形参的实际参数传递给函数时，元组名称前也要加一个半角*号
+print(strR3)
+运行结果如下：
+('孤荷凌寒', '的信息有：', ('男', '37 years old', '175cm'))
+
+五、	函数的关键字形参
+先来建构一个有关键字形参的函数：
+def func(var,**var2):
+    return var, '的信息有：',var2
+strName='孤荷凌寒'
+strA='男'
+strB='37 years old'
+strC='175cm'
+
+strR1=func(strName,strA=strA,strB=strB,strC=strC)  #这儿给关键字形参指定了三个key=value（字典形式）的实际参数
+print('strR1=',strR1)
+strR2=func(strName,sex='男',age=37,height=175) #这儿给关键字形参指定了三个key=value（字典形式）的实际参数
+print('strR2=',strR2)
+关键字形参是：var2 ，关键字形参最大的特点是，在形参名之前有两个半角*号
+运行结果如下:
+strR1= ('孤荷凌寒', '的信息有：', {'strA': '男', 'strB': '37 years old', 'strC': '175cm'})
+strR2= ('孤荷凌寒', '的信息有：', {'sex': '男', 'age': 37, 'height': 175})
+从运行结果我们可以看出，当函数接收到关键字形参对应的实际参数后，是把接收到的多个关键字实际参数（是按key=value的字典样式传递给函数的）当作字典来处理的。
+那么，我们也就可以直接将一个字典对象作为函数关键字形参的实际参数传递给函数：
+再测试如下：
+def func(var,**var2):
+    return var, '的信息有：',var2
+strName='孤荷凌寒'
+dicA=dict(sex='男',age=37,height=175)
+strR3=func(strName,**dicA)  #这儿给关键字形参指定了一个字典对象dicA作为它的实际参数，注意字典对象名称前加了两个半角*号
+print(strR3)
+运行结果：
+('孤荷凌寒', '的信息有：', {'sex': '男', 'age': 37, 'height': 175})
+
+欢迎联系我加入倡导终身学习终身成长的社群——
+就是要学  社群  www.941xue.com/index.aspx 
+ 
+原文地址：http://www.941xue.com/content.aspx?id=182
+B站视频：https://www.bilibili.com/video/BV1tt411U7PJ/

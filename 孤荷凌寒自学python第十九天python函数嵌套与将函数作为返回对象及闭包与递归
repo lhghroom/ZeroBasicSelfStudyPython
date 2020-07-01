@@ -1,0 +1,73 @@
+Python函数非常的灵活，今天学习了python函数的以下几个知识点：
+一、	在函数中可以定义子函数，并且可以将子函数作为函数的返回对象返回给外部
+测试：
+def myconnecttostring(*args):
+    def fin():
+        strResult=''
+        for strA in args:  #这儿函数fin使用的是它的父函数myconnecttostring的形式参数（也就是myconnecttostring的局部变量），那么fin这个函数是闭包的。
+            strResult+=strA
+        return strResult
+    return fin
+
+lstA=list('孤荷凌寒的QQ号是：578652607')
+print(lstA)
+f=myconnecttostring(*lstA)
+print(f)   #打印此作为函数返回对象的函数f在内存中的地址，下面重复执行一次，将发现每次返回的函数对象并不是同一个
+strA=f()  #f既然是一个函数，那么就可以执行它
+print(strA)
+f=myconnecttostring(*lstA) #完全相同地再调用一次函数myconnecttostring，但作为对象返回的函数f与之前不是同一个对象！！
+print(f)  #再看看这个新的函数f在内存中的地址与前一个是不一样的。
+运行结果 ：
+['孤', '荷', '凌', '寒', '的', 'Q', 'Q', '号', '是', '：', '5', '7', '8', '6', '5', '2', '6', '0', '7']
+<function myconnecttostring.<locals>.fin at 0x00000290DC75A2F0>
+孤荷凌寒的QQ号是：578652607
+<function myconnecttostring.<locals>.fin at 0x00000290DC77D400>
+二、	递归
+一个函数 体的内部代码块中的代码 再次调用 自己，则称之为递归。
+递归是一种特殊的循环。
+这种循环的终止在于达到设定的条件时就不再调用自己，那么递归循环结束。
+测试阶乘：
+def jiecheng(intMax):
+    if intMax==1:
+        return 1
+    return intMax * jiecheng(intMax-1)
+
+intM=10
+intResult=jiecheng(intM)
+print(intResult)
+运行结果：
+3628800
+测试函数jiecheng的核心语句是：
+intMax * jiecheng(intMax-1)
+也就是说不断递归调用函数jiecheng自己来做intMax-1的阶乘
+最后一个递归调用函数jiecheng时其实是一次性完成了：
+10x9x8x7x6x5x4x3x2x1
+的计算。
+如果 intMax的值设置得非常大，那么让cpu一次执行这样的运算，可能会造成系统算力崩溃。
+于是这种把所有计算全部堆到最后一次调用递归函数 时才一次计算的方法是不可取的，我们应当使用
+尾递归
+测试：
+def jiecheng(intMax):
+    if intMax==1:
+        return 1
+    return jiechengsub(intMax,1)  #函数 jiechengsub 才是真正的递归调用的函数，给jiechengsub的形参intLastResult传递的实参为1，是因为，第一次调用jiechengsub时，之前的递归计算结果还没有，就是1，因为1乘以任何数还等于任何数。
+
+#函数 jiechengsub 的第一个形参intCurBig表示当前阶乘计算到最大值的哪一个数来了；第二个形参intLastResult表示在本次调用之前已经计算过的阶乘的积
+def jiechengsub(intCurBig,intLastResult):
+    intCur=intCurBig * intLastResult #先计算当前最大数intCurBig与之前已经取得的部分阶乘结果intLastResult相乘，这儿就把计算分解到每次递归都计算一次
+    if intCurBig!=1:
+        intSub=jiechengsub(intCurBig-1,intCur) #然后再次递归调用的时候，已经将本次调用的计算结果 intCur作为形参intLastResult的实参传递给下次调用了
+        return intSub
+    else:
+        return intCur #如果intCurBig已经为1，则递归过程已经结束，不再递归调用，返回最终结果 。
+intM=10
+intResult=jiecheng(intM)
+print(intResult)
+运算结果：
+3628800
+尾递归将庞大的计算分解到每次计算中都计算一点，这样分散的计算才不会对电脑CPU造成过重的负担，是比较科学的递归设计方案。
+欢迎联系我加入倡导终身学习终身成长的社群——
+就是要学  社群  www.941xue.com/index.aspx 
+ 
+原文地址：http://www.941xue.com/content.aspx?id=188 
+B站视频：https://www.bilibili.com/video/BV1bt411U7Lg/ 

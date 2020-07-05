@@ -1,0 +1,176 @@
+孤荷凌寒自学python第二十二天python类的继承
+
+（完整学习过程屏幕记录视频地址在文末，手写笔记在文末）
+python中定义的类可以继承自其它类，所谓继承的概念，我的理解 是，就是一个类B继承自类A,意味着类B的内部代码块中就算不写任何代码，类B仍然拥有类A的所有公开的属性和方法。
+
+这个优势非常方便于我们在要创建一个在原有类的基础上只是稍微有所变化 的类时，可以只通过继承一个类之后，再作属性和方法增改即可完成，大大的减轻了代码工作量。
+
+在类的继承活动中，被继承的类称之为【基类】也叫【父类】
+而继承【基类】而得到的新的类，叫【子类】
+
+一、	单一继承
+一个【子类】只从一个【基类】继承而来。
+测试：
+class cup(object): #作为基类
+    __private='我是cup类的私有属性'
+    public='我是cup类的公开属性'
+    one='我是cup类的第一属性'
+    __two='我是cup类的第二属性'
+
+    def __init__(self,one,two):
+        self.one=one
+        self.two=two
+
+    def publicmethod(self,var1,var2):
+        return "cup类的公开方法收到的参数是：" + var1 + "," + var2 + ',私用属性__two=' + self.__two
+    def __privatemethod(self):
+        print('这是cup类中的私有方法打印的内容。')
+
+newcupone=cup('陶瓷','白色')
+str1=newcupone.publicmethod('内容一','内容二')
+
+class bluecup(cup): #继承自cup类的子类
+    pass #当前 子类 内部代码 什么也没有定义。
+
+newbluecupone=bluecup('玻璃','蓝色')
+str2=newbluecupone.publicmethod('子类的内容一','子类的内容二')
+
+print(str1)
+print(str2)
+运行结果：
+cup类的公开方法收到的参数是：内容一,内容二,私用属性__two=我是cup类的第二属性
+cup类的公开方法收到的参数是：子类的内容一,子类的内容二,私用属性__two=我是cup类的第二属性
+	从运行结果中注意到，基类cup的实例化对象newcupone执行方法：publicmethod
+	和
+	子类bluecup的实例化对象newbluecupone执行方法：publicmethod
+	得到的结果实质上并没有什么不同。
+	这是因为子类bluecup没有定义自己的publicmethod方法，因此 只是完全照搬cup类的这个方法而已。
+	子类并没有继承基类的私有方法与属性。
+测试如下：
+class cup(object): #作为基类
+    __private='我是cup类的私有属性'
+    public='我是cup类的公开属性'
+    one='我是cup类的第一属性'
+    __two='我是cup类的第二属性'
+
+    def __init__(self,one,two):
+        self.one=one
+        self.two=two
+
+    def publicmethod(self,var1,var2):
+        return "cup类的公开方法收到的参数是：" + var1 + "," + var2 + ',私用属性__two=' + self.__two
+    def __privatemethod(self):
+        return '这是cup类中的私有方法打印的内容。'
+
+newcupone=cup('陶瓷','白色')
+str1=newcupone.publicmethod('内容一','内容二')
+
+class bluecup(cup): #继承自cup类的子类
+    bluecupnewshuxing=cup.__privatemethod() #这儿尝试调用基类的私用方法__privatemethod，注意调用方法是：基类名.基类方法()
+    #执行上一语句会出错。因为子类并没有继承基类的私有方法
+
+newbluecupone=bluecup('玻璃','蓝色')
+str2=newbluecupone.publicmethod('子类的内容一','子类的内容二')
+
+print(str1)
+print(str2)
+
+运行结果：
+Traceback (most recent call last):
+  File "c:\Users\pw\Desktop\新建文本文档.py", line 19, in <module>
+    class bluecup(cup): #继承自cup类的子类
+  File "c:\Users\pw\Desktop\新建文本文档.py", line 20, in bluecup
+    bluecupnewshuxing=cup.__privatemethod() #这儿尝试调用基类的私用方法__privatemethod，注意调用方法是：基类名.基类方法()
+AttributeError: type object 'cup' has no attribute '_bluecup__privatemethod'
+当然子类中可以调用基类的公用方法，调用方法仍然是;
+基类名.基类方法()
+
+二、	多重继承
+一个类也可以从多个基类中继承属性和方法，称之为多重继承，只需要在定义类的基类列表中输入多个基类名称即可。
+class cup(object): #作为基类
+    __private='我是cup类的私有属性'
+    public='我是cup类的公开属性'
+    one='我是cup类的第一属性'
+    __two='我是cup类的第二属性'
+
+    def __init__(self,one,two):
+        self.one=one
+        self.two=two
+
+    def publicmethod(self,var1,var2):
+        return "cup类的公开方法收到的参数是：" + var1 + "," + var2 + ',私用属性__two=' + self.__two
+    def __privatemethod(self):
+        return '这是cup类中的私有方法打印的内容。'
+    def 倒掉水(self):
+        return '这是cup类执行了【倒掉水】的方法。'
+
+class glass(object): #作为基类
+    __private='我是glass类的私有属性'
+    public='我是glass类的公开属性'
+    one='我是glass类的第一属性'
+    __two='我是glass类的第二属性'
+    three='我是glass类的第三属性'
+
+    def __init__(self,one,two,three):
+        self.one=one
+        self.two=two
+        self.three=three
+
+    def publicmethod(self,var1,var2):
+        return "glass类的公开方法收到的参数是：" + var1 + "," + var2 + ',私用属性__two=' + self.__two
+    def __privatemethod(self):
+        return '这是glass类中的私有方法打印的内容。'
+    def 碎掉(self):
+        return('glass类的实体化对象执行此方法后，碎掉了。')
+
+class cupglass(cup,glass): #继承自cup类和glass类而实现双重继承的子类
+    pass
+
+newobj=cupglass('玻璃','蓝色') #因为定义cupglass类时，基类列表是有顺序的，基类cup在列表最前面，优先级最高，因此以它的初始化方法函数 的参数个数为准
+newobj2=cupglass('陶瓷','白色')
+str1=newobj.publicmethod('子类的内容一','子类的内容二')
+str2=newobj2.publicmethod('子类二的内容一','子类二的内容二')
+
+print(str1)
+print(str2)
+
+运行结果：
+cup类的公开方法收到的参数是：子类的内容一,子类的内容二,私用属性__two=我是cup类的第二属性
+cup类的公开方法收到的参数是：子类二的内容一,子类二的内容二,私用属性__two=我是cup类的第二属性
+	从运行结果从可以看出，cupglass类继承两个基类中同名的公开方法publicmethod时，发现永远都只执行了cup基类的publicmethod方法，这是为什么呢？
+	原来定义cupglass类时，基类列表是有顺序的，基类cup在列表最前面，优先级最高，所以当多个基类中出现重名的对象时，默认继承优先级高的基类的对象。
+
+就是要学  社群  www.941xue.com/index.aspx 
+ 原文地址：http://www.941xue.com/content.aspx?id=215   
+B站视频：https://www.bilibili.com/video/BV1Mt41117Eb/ 
+
+我的qq号：578652607 微信: dalingshu
+
+【欢迎大家加入[就是要学]社群】
+如今，这个世界的变化与科技的发展就像一个机器猛兽，它跑得越来越快，跑得越来越快，在我们身后追赶着我们。
+很多人很早就放弃了成长，也就放弃了继续奔跑，多数人保持终身不变的样子，原地不动，成为那猛兽的肚中餐——当然那也不错，在猛兽的逼迫下，机械的重复着自我感觉还良好地稳定工作与生活——而且多半感觉不到这有什么不正常的地方，因为在猛兽肚子里的是大多数人，就好像大多数人都在一个大坑里，也就感觉不出来这是一个大坑了，反而坑外的世界显得有些不大正常。
+为什么我们不要做坑里的大多数人？
+因为真正的人生，应当有百万种可能 ；因为真正的一生可以有好多辈子组成，每一辈子都可以做自己喜欢的事情；因为真正的人生，应当有无数种可以选择的权利，而不是总觉得自己别无选择。因为我们要成为一九法则中为数不多的那个一；因为我们要成为自己人生的导演而不是被迫成为别人安排的戏目中的演员。
+【请注意】
+就是要学社群并不会告诉你怎样一夜暴富！也不会告诉你怎样不经努力就实现梦想！
+【请注意】
+就是要学社群并没有任何可以应付未来一切变化的独门绝技，也没有值得吹嘘的所谓价值连城的成功学方法论！
+【请注意】
+社群只会互相帮助，让每个人都看清自己在哪儿，自己是怎样的，重新看见心中的梦想，唤醒各自内心中的那个英雄，然后勇往直前，成为自己想要成为的样子！
+期待与你并肩奔赴未来！
+www.941xue.com 
+QQ群：646854445 （【就是要学】终身成长）
+ 
+
+
+
+我的学习过程录像百度盘地址分享如下：（清晰度：1280x720）
+链接：https://pan.baidu.com/s/17kG7YiFYV20s7j6ML88mZw  密码：mpag
+
+Bilibili:
+https://www.bilibili.com/video/av36211003/ 
+
+喜马拉雅语音笔记：
+https://www.ximalaya.com/keji/19103006/140522246 
+
+

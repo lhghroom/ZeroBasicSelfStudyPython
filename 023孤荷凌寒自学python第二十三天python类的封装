@@ -1,0 +1,145 @@
+一、	从怎么样访问类的内部代码块中定义的私有属性说起
+类中定义的私有属性和私有方法是无法被外部代码块访问的，就算是类的继承类也无法访问基类（父类）的私有对象。
+然而这却并不是绝对的说法，其实python语言灵活地留了一手，是可以直接使用点语法访问类的私有对象的！
+测试：
+class cup(object): #作为基类
+    __private='我是cup类的私有属性'    #私有属性
+    public='我是cup类的公开属性'
+    one='我是cup类的第一属性'
+    __two='我是cup类的第二属性'  #私有属性
+
+    def __init__(self,one,two):
+        self.one=one
+        self.two=two
+
+    def publicmethod(self,var1,var2):
+        return "cup类的公开方法收到的参数是：" + var1 + "," + var2 + ',私用属性__two=' + self.__two
+    def __privatemethod(self):    #私有方法
+        return '这是cup类中的私有方法打印的内容。'
+    def __倒掉水(self):   #私有方法
+        return '这是cup类执行了【倒掉水】的方法。'
+
+class glass(object): #作为基类
+    __private='我是glass类的私有属性'  #私有属性
+    public='我是glass类的公开属性'
+    one='我是glass类的第一属性'
+    __two='我是glass类的第二属性'   #私有属性
+    three='我是glass类的第三属性'
+
+    def __init__(self,one,two,three):
+        self.one=one
+        self.two=two
+        self.three=three
+
+    def publicmethod(self,var1,var2):
+        return "glass类的公开方法收到的参数是：" + var1 + "," + var2 + ',私用属性__two=' + self.__two
+    def __privatemethod(self):   #私有方法
+        return '这是glass类中的私有方法打印的内容。'
+    def __碎掉(self):   #私有方法
+        return('glass类的实体化对象执行此方法后，碎掉了。')
+
+class cupglass(cup,glass): #继承自cup类和glass类而实现双重继承的子类
+    pass
+
+newobj=cupglass('玻璃','蓝色') #因为定义cupglass类时，基类列表是有顺序的，基类cup在列表最前面，优先级最高，因此以它的初始化方法函数 的参数个数为准
+newobj2=cupglass('陶瓷','白色')
+str1=newobj._glass__碎掉()  #访问类中私有对象的方法是：一根下划线 加上 最初定义方法函数的类名 加上 私有对象名。
+str2=newobj2._cup__倒掉水()
+str3=newobj._glass__private
+str4=newobj._cup__private
+
+print(str1)
+print(str2)
+print(str3)
+print(str4)
+运行结果 ：
+glass类的实体化对象执行此方法后，碎掉了。
+这是cup类执行了【倒掉水】的方法。
+我是glass类的私有属性
+我是cup类的私有属性
+
+小结：
+类中的私有对象其实也是可以通过点语法直接访问的，方法是：
+实例化的对象名 . _最初定义私有对象的基类名私有对象名
+测试中的例子：
+str2=newobj2  . _cup__倒掉水()
+【最初定义私有对象的基类名】的解释：
+实例化后的对象：newobj2 是 cupglass 类的实例化对象。
+而cupclass 类 继承自两个 基类 cup  glass .
+要调用的私有对象 __倒掉水()  本质上不是由 cupglass类亲自 定义的，
+而是cupglass 类从 cup 类中继承而来,事实上由cup类亲自定义的，
+因此我们在这儿写的【最初定义私有对象的基类名】就只能写：cup而不是写 cupglass。
+
+二、	真正正确地访问类中私有对象方法是通过类的封装来实现
+虽然第一点的方法可能访问到类的私有对象，但其实并不安全，会对类的内部对象造成干扰，如果操作不当，类的实例化对象的稳定性就会受到影响。
+因此 真正正确的做法是，通过在类的内部代码块中 封装好对各个 私有对象的访问方法。
+关于封装的测试：
+class clsTwo(object):
+    __width=0 #全部属性都被定义为了私有属性。
+    __wide=0
+    __height=0
+    __color=0
+
+    #下面定义类的初始化方法
+    def __init__(self,width,wide,height,color):
+        self.__width=width
+        self.__wide=wide
+        self.__height=height
+        self.__color=color
+
+    #下面开始封装方法函数的定义，通过下列封装方法函数来间接取得和设置 类中 各个 私有属性的值
+    #得到__height的封装方法函数
+    def getheight(self):
+        return self.__height
+
+    #设置__height值的封装方法函数
+    def setheight(self,height):
+        self.__height=height
+
+obj=clsTwo(100,80,60,'red') #得到类clsTwo的一个实例化对象
+intHeight=obj.getheight() #调用类的公开封装方法来获取__height
+print(intHeight)
+intHeight=intHeight+100
+obj.setheight(intHeight)  #调用类的公开封装方法来设置__height
+intTemp=obj.getheight()
+print(intTemp)
+
+运行结果：
+60
+160
+通过封装后，外部代码将不会直接访问和操作类的实例化对象的属性，全部通过类的公开方法来进行，提高了代码安全性。
+
+我的qq号：578652607 微信: dalingshu
+
+就是要学  社群  www.941xue.com/index.aspx 
+ 原文地址：http://www.941xue.com/content.aspx?id=225    
+B站视频：https://www.bilibili.com/video/BV1xt411U7Rt/  
+
+
+【欢迎大家加入[就是要学]社群】
+如今，这个世界的变化与科技的发展就像一个机器猛兽，它跑得越来越快，跑得越来越快，在我们身后追赶着我们。
+很多人很早就放弃了成长，也就放弃了继续奔跑，多数人保持终身不变的样子，原地不动，成为那猛兽的肚中餐——当然那也不错，在猛兽的逼迫下，机械的重复着自我感觉还良好地稳定工作与生活——而且多半感觉不到这有什么不正常的地方，因为在猛兽肚子里的是大多数人，就好像大多数人都在一个大坑里，也就感觉不出来这是一个大坑了，反而坑外的世界显得有些不大正常。
+为什么我们不要做坑里的大多数人？
+因为真正的人生，应当有百万种可能 ；因为真正的一生可以有好多辈子组成，每一辈子都可以做自己喜欢的事情；因为真正的人生，应当有无数种可以选择的权利，而不是总觉得自己别无选择。因为我们要成为一九法则中为数不多的那个一；因为我们要成为自己人生的导演而不是被迫成为别人安排的戏目中的演员。
+【请注意】
+就是要学社群并不会告诉你怎样一夜暴富！也不会告诉你怎样不经努力就实现梦想！
+【请注意】
+就是要学社群并没有任何可以应付未来一切变化的独门绝技，也没有值得吹嘘的所谓价值连城的成功学方法论！
+【请注意】
+社群只会互相帮助，让每个人都看清自己在哪儿，自己是怎样的，重新看见心中的梦想，唤醒各自内心中的那个英雄，然后勇往直前，成为自己想要成为的样子！
+期待与你并肩奔赴未来！
+www.941xue.com 
+QQ群：646854445 （【就是要学】终身成长）
+ 
+
+
+我的学习过程录像百度盘地址分享如下：（清晰度：1280x720）
+链接：https://pan.baidu.com/s/1kv77Tjel4PtfFScYe2qgXw  密码：2zc5
+
+Bilibili:
+https://www.bilibili.com/video/av36211235/ 
+
+喜马拉雅语音笔记：
+https://www.ximalaya.com/keji/19103006/140726943 
+
+

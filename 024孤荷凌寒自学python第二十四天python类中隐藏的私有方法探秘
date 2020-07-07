@@ -1,0 +1,214 @@
+（完整学习过程屏幕记录视频地址在文末，手写笔记在文末）
+今天发现了python的类中隐藏着一些特殊的私有方法。
+这些私有方法不管我们定义类时是否在类的内部代码块中定义过它们，这些私有方法都是存在的。比如已经知道的 __init__ 方法就是其中一个。
+一、	__str__
+此方法将输出在本身的相关信息文本。
+测试：
+class ghlh(object):
+    name='孤荷凌寒'
+    qq='578652607'
+
+newghlh=ghlh()
+strTemp=newghlh.__str__()
+print(strTemp)
+运行结果 ：
+<__main__.ghlh object at 0x000002030E274CC0>
+当然同 __init__ 方法一样，我们可以自己重新覆盖 书写 此方法的代码：
+class ghlh(object):
+    name='孤荷凌寒'
+    qq='578652607'
+
+    def __str__(self):
+        return self.name
+
+newghlh=ghlh()
+strTemp=newghlh.__str__()
+print(strTemp)
+现在的运行结果：
+孤荷凌寒
+
+二、	__iter__
+通过类的此方法，可以使一个类的实例化对象变成一个迭代器。
+但是此方法必须配合显式定义过的：
+__next__
+方法同时使用才有实际功用。
+测试如下：
+class ghlh(object):
+    name='孤荷凌寒'
+    qq='578652607'
+    a=0
+    b=1
+
+    def __str__(self):
+        return self.name
+
+    def __init__(self,a=0,b=1):
+        self.a=a
+        self.b=b
+
+    def __iter__(self):
+        return self #通过此语句，使类的实例化对象成为一个迭代器，可以在被 循环语句 读取时，每次返回自身中 __next__ 方法的下一对象值
+
+    def __next__(self):
+        self.a,self.b=self.b,self.a+self.b #每次被访问本迭代器时，都返回当前a,b的下一个值，b=上一个a+上一个b
+        if self.a>10000: #加个条件，使本 迭代器 成为一个有限元素的 迭代器，否则将无穷下去。
+            raise StopIteration #当达到条件时，通过raise返回一个迭代元素结束的错误来使本 迭代器 的元素是有限的。
+        return self.a  #每次被 访问 本迭代器时，将a的值返回给调用的 循环语句
+
+newghlh=ghlh()
+#strTemp=newghlh.__str__()
+#print(strTemp)
+
+#因为我们已经在类中定义了 __iter__ 方法 和 __next__ 方法，现在类的实例化对象 newghlh 已经成为了一个迭代器，可以在循环体中直接使用了。
+for n in newghlh:
+    print(n)
+运行结果 ：
+1
+1
+2
+3
+5
+8
+13
+21
+34
+55
+89
+144
+233
+377
+610
+987
+1597
+2584
+4181
+6765
+
+三、	 __getitem__
+通过显式地编写好此私有方法的代码，可以实现将类实例化后的对象当作列表来使用的效果。
+测试：
+class ghlh(object):
+    name='孤荷凌寒'
+    qq='578652607'
+    a=0
+    b=1
+
+    def __str__(self):
+        return self.name
+
+    def __init__(self,a=0,b=1):
+        self.a=a
+        self.b=b
+
+    def __iter__(self):
+        return self #通过此语句，使类的实例化对象成为一个迭代器，可以在被 循环语句 读取时，每次返回自身中 __next__ 方法的下对象值
+
+    def __next__(self):
+        self.a,self.b=self.b,self.a+self.b #每次被访问本迭代器时，都返回当前a,b的下一个值，b=上一个a+上一个b
+        if self.a>10000: #加个条件，使本 迭代器 成为一个有限元素的 迭代器，否则将无穷下去。
+            raise StopIteration #当达到条件时，通过raise返回一个迭代元素结束的错误来使本 迭代器 的元素是有限的。
+        return self.a  #每次被 访问 本迭代器时，将a的值返回给调用的 循环语句
+
+    def __getitem__(self,n):
+        for x in range(n):   #将a的值变化 n 次（最大次数），然后就相当于建立 了一个 内部元素 总数为 n 个的列表
+            self.a,self.b=self.b,self.a+self.b
+        return self.a
+
+newghlh=ghlh()
+#strTemp=newghlh.__str__()
+#print(strTemp)
+
+#因为我们已经在类中定义了 __iter__ 方法 和 __next__ 方法，现在类的实例化对象 newghlh 已经成为了一个迭代器，可以在循环体中直接使用了。
+#for n in newghlh:
+#    print(n)
+
+intNew=newghlh[3] #现在对于 ghlh 类实例化的 对象 newghlh 可以像使用 列表一样访问其元素了。
+print(intNew)
+运行结果 ：
+2
+
+四、	__getattr__
+通过此内部方法来获取类实例化后的对象中的对象时，就算要获取 的对象根本不存在，也不会抛出错误。
+
+五、	__call__
+通过显式地编写此私有方法的代码，主要是给此方法函数添加形式参数（也可以不添加形式参数），并让函数内部代码块执行一定的操作。
+那么只要在类的内部代码块中显式地重定义了此方法函数，就可以将 此 类 实例化后的对象名 当作一个函数名称来使用，当调用这个“函数”时，实则上是执行了类代码中的私有方法：
+__call__
+测试：
+class ghlh(object):
+    name='孤荷凌寒'
+    qq='578652607'
+    a=0
+    b=1
+
+    def __str__(self):
+        return self.name
+
+    def __init__(self,a=0,b=1):
+        self.a=a
+        self.b=b
+
+    def __iter__(self):
+        return self #通过此语句，使类的实例化对象成为一个迭代器，可以在被 循环语句 读取时，每次返回自身中 __next__ 方法的下对象值
+
+    def __next__(self):
+        self.a,self.b=self.b,self.a+self.b #每次被访问本迭代器时，都返回当前a,b的下一个值，b=上一个a+上一个b
+        if self.a>10000: #加个条件，使本 迭代器 成为一个有限元素的 迭代器，否则将无穷下去。
+            raise StopIteration #当达到条件时，通过raise返回一个迭代元素结束的错误来使本 迭代器 的元素是有限的。
+        return self.a  #每次被 访问 本迭代器时，将a的值返回给调用的 循环语句
+
+    def __getitem__(self,n):
+        for x in range(n):   #将a的值变化 n 次（最大次数），然后就相当于建立 了一个 内部元素 总数为 n 个的列表
+            self.a,self.b=self.b,self.a+self.b
+        return self.a
+
+    def __call__(self,strMsg):
+        print('这是在类内部代码块中声明的一个方法：收到的形式参数对应的实参的值是：“' + strMsg + '”')
+
+newghlh=ghlh()
+#strTemp=newghlh.__str__()
+#print(strTemp)
+
+#因为我们已经在类中定义了 __iter__ 方法 和 __next__ 方法，现在类的实例化对象 newghlh 已经成为了一个迭代器，可以在循环体中直接使用了。
+#for n in newghlh:
+#    print(n)
+
+#intNew=newghlh[3] #现在对于 ghlh 类实例化的 对象 newghlh 可以像使用 列表一样访问其元素了。
+#print(intNew)
+
+newghlh('将类的实例化后的对象当作了函数来使用，这是传递的实际参数') #现在可以像调用函数一样调用这个类的实例化对象名称
+运行结果：
+这是在类内部代码块中声明的一个方法：收到的形式参数对应的实参的值是：“将类的实例化后的对象当作了函数来使用，这是传递的实际参数”
+
+我的qq号：578652607 微信: dalingshu
+
+就是要学  社群  www.941xue.com/index.aspx 
+ 原文地址：http://www.941xue.com/content.aspx?id=229     
+B站视频：https://www.bilibili.com/video/BV1Mt41117tW/  
+
+
+【欢迎大家加入[就是要学]社群】
+如今，这个世界的变化与科技的发展就像一个机器猛兽，它跑得越来越快，跑得越来越快，在我们身后追赶着我们。
+很多人很早就放弃了成长，也就放弃了继续奔跑，多数人保持终身不变的样子，原地不动，成为那猛兽的肚中餐——当然那也不错，在猛兽的逼迫下，机械的重复着自我感觉还良好地稳定工作与生活——而且多半感觉不到这有什么不正常的地方，因为在猛兽肚子里的是大多数人，就好像大多数人都在一个大坑里，也就感觉不出来这是一个大坑了，反而坑外的世界显得有些不大正常。
+为什么我们不要做坑里的大多数人？
+因为真正的人生，应当有百万种可能 ；因为真正的一生可以有好多辈子组成，每一辈子都可以做自己喜欢的事情；因为真正的人生，应当有无数种可以选择的权利，而不是总觉得自己别无选择。因为我们要成为一九法则中为数不多的那个一；因为我们要成为自己人生的导演而不是被迫成为别人安排的戏目中的演员。
+【请注意】
+就是要学社群并不会告诉你怎样一夜暴富！也不会告诉你怎样不经努力就实现梦想！
+【请注意】
+就是要学社群并没有任何可以应付未来一切变化的独门绝技，也没有值得吹嘘的所谓价值连城的成功学方法论！
+【请注意】
+社群只会互相帮助，让每个人都看清自己在哪儿，自己是怎样的，重新看见心中的梦想，唤醒各自内心中的那个英雄，然后勇往直前，成为自己想要成为的样子！
+期待与你并肩奔赴未来！
+www.941xue.com 
+QQ群：646854445 （【就是要学】终身成长）
+ 
+
+
+我的学习过程录像百度盘地址分享如下：（清晰度：1280x720）
+链接：https://pan.baidu.com/s/1p_0uK4C8MBN-p6vtIBXPUQ  密码：p1z1
+
+Bilibili:
+https://www.bilibili.com/video/av36211518/ 
+
+喜马拉雅语音笔记：
+https://www.ximalaya.com/keji/19103006/140981786 

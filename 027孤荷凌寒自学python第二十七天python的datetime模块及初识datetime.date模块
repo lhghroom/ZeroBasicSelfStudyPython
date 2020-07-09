@@ -1,0 +1,139 @@
+一、	datetime模块
+datetime模块包含以下子模块：
+(一)	表示 时刻点 的模块
+datetime.date
+datetime.time
+datetime.datetime
+datetime.datetime_CAPI
+(二)	表示 时间间隔（时间长度）的模块
+datetime.delta
+(三)	表示 时区信息的模块
+datetime.tzinfo
+
+二、	datetime模块表示 时间的起止极限
+datetime模块能表达1-9999年的所有时间。
+有两个相关常量
+datetime.MINYEAR =1
+datetime.MAXYEAR=9999
+
+三、	初识 datetime.date 子模块
+datetime.date实例化时的初始形参有三个：年、月、日
+执行初始化即可得到一个实例化的datetime.date对象：
+测试：
+>>> import datetime
+>>> dateTemp=datetime.date(2018,10,8)
+>>> print(dateTemp)
+2018-10-08
+
+四、	datetime.date对象的常用属性
+最常用的属性有四个：
+year  返回日期中的 年
+month 返回日期中的 月
+day 返回日期中的 日
+
+__getattribute__  获取日期对象中指定的属性
+
+下面继续上面的测试（只有新增加的代码部分）
+>>> intY=dateTemp.year
+>>> intM=dateTemp.month
+>>> intD=dateTemp.day
+>>> print(intY,intM,intD)
+2018 10 8
+>>> intY2=dateTemp.__getattribute__('year')
+>>> print(intY2)
+2018
+
+五、	比较两个  datetime.date对象的大小
+使用 datetime.date 对象的以下内部 方法  比较 当前datetime.date对象与另一个datetime.date对象的大小：
+测试如下：
+import datetime
+dateOne=datetime.date(2018,6,30)
+dateTwo=datetime.date(2018,7,1)
+print(dateOne.__eq__(dateTwo))  #dateOne是否等于dateTwo
+print(dateOne.__ge__(dateTwo))  #dateOne是否大于等于dateTwo
+print(dateOne.__gt__(dateTwo))  #dateOne是否大于dateTwo
+print(dateOne.__le__(dateTwo))  #dateOne是否小于等于dateTwo
+print(dateOne.__lt__(dateTwo))  #dateOne是否小于dateTwo
+print(dateOne.__ne__(dateTwo))  #dateOne是否不等于dateTwo
+以上所有方法都返回 布尔对象 True 或 False
+
+六、	两个datetime.date对象的 减法操作
+1 正向相减（当前日期对象减去后面参数的日期对象）
+x.__sub__(y)  表示x-y
+2 反向相减 （后面的参数的日期对象减去当前日期对象）
+x.__rsub__(y) 表示y-x
+
+执行datetime.date对象的这两个方法后，返回的是一个：
+datetime.timedelta
+对象。
+
+七、	对datetime.date对象的国际化处理(iso标准)
+1 isocalendar()
+执行此方法 ，将返回一个元组，此元组对象有三个元素，先后顺序排列为：
+年、一年的第几周、星期几（1表示星期一）
+测试：
+>>> import datetime
+>>> a=datetime.date(2017,3,22)
+>>> tpl=a.isocalendar()
+>>> print(tpl)
+(2017, 12, 3)
+
+2  isoformat()   __str__()
+执行此方法，将返回国际标准的日期字符串：
+YYYY-MM-DD
+在操作系统日期环境设置为中文的情况下，__str__()方法返回结果与isoformat()方法一样。
+测试：
+>>> import datetime
+>>> d=datetime.date(2018,10,9)
+>>> strA=d.isoformat()
+>>> strB=d.__str__()
+>>> print(strA,strB)
+2018-10-09 2018-10-09
+3  isoweekday()
+执行此方法 将返回 星期几对应的数字 1-7，其中1表示星期一，7表示星期日
+继续上面的测试（以下代码只有新增的代码 部分）
+>>> intWeekDay=d.isoweekday()
+>>> print(intWeekDay)
+2
+
+八、	datetime.date 对象的其它方法
+1 weekday()
+执行此方法 将返回 星期几对应的数字 0-6 ，其中0表示星期一，6表示星期日
+
+2 timetuple()
+执行此方法  将把当前datetime.date对象转换成time模块中的 struct_time(标准时间元组)对象。
+但datetime.date对象中没有时间信息，那么，转换后的struct_time（标准时间元组）对象中的所有与时间相关的值都用0来填充。
+继续上面的测试（以下代码只有新增的代码 部分）：
+>>> tplStruct_Time=d.timetuple()
+>>> print(tplStruct_Time)
+time.struct_time(tm_year=2018, tm_mon=10, tm_mday=9, tm_hour=0, tm_min=0, tm_sec=0, tm_wday=1, tm_yday=282, tm_isdst=-1)
+
+我的qq号：578652607 微信: dalingshu
+
+就是要学  社群  www.941xue.com/index.aspx 
+ 原文地址：http://www.941xue.com/content.aspx?id=246        
+
+【欢迎大家加入[就是要学]社群】
+如今，这个世界的变化与科技的发展就像一个机器猛兽，它跑得越来越快，跑得越来越快，在我们身后追赶着我们。
+很多人很早就放弃了成长，也就放弃了继续奔跑，多数人保持终身不变的样子，原地不动，成为那猛兽的肚中餐——当然那也不错，在猛兽的逼迫下，机械的重复着自我感觉还良好地稳定工作与生活——而且多半感觉不到这有什么不正常的地方，因为在猛兽肚子里的是大多数人，就好像大多数人都在一个大坑里，也就感觉不出来这是一个大坑了，反而坑外的世界显得有些不大正常。
+为什么我们不要做坑里的大多数人？
+因为真正的人生，应当有百万种可能 ；因为真正的一生可以有好多辈子组成，每一辈子都可以做自己喜欢的事情；因为真正的人生，应当有无数种可以选择的权利，而不是总觉得自己别无选择。因为我们要成为一九法则中为数不多的那个一；因为我们要成为自己人生的导演而不是被迫成为别人安排的戏目中的演员。
+【请注意】
+就是要学社群并不会告诉你怎样一夜暴富！也不会告诉你怎样不经努力就实现梦想！
+【请注意】
+就是要学社群并没有任何可以应付未来一切变化的独门绝技，也没有值得吹嘘的所谓价值连城的成功学方法论！
+【请注意】
+社群只会互相帮助，让每个人都看清自己在哪儿，自己是怎样的，重新看见心中的梦想，唤醒各自内心中的那个英雄，然后勇往直前，成为自己想要成为的样子！
+期待与你并肩奔赴未来！
+www.941xue.com 
+QQ群：646854445 （【就是要学】终身成长）
+ 
+
+
+我的学习过程录像百度盘地址分享如下：（清晰度：1280x720）
+链接：https://pan.baidu.com/s/1sxoKKui9oqis5cPSnPam0w  密码：msqa
+
+喜马拉雅语音笔记：
+https://www.ximalaya.com/keji/19103006/141893275 
+   
+

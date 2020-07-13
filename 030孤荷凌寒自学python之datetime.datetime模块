@@ -1,0 +1,104 @@
+datetime.datetime模块包含了：datetime.date 和 datetime.time 的全部属性和方法。
+因为datetime.datetime类就多重继承自datetime.date类与datetime.time类。对于两个基类中同名的一些方法，进行了重写。
+测试：
+>>>import datetime
+>>>d=datetime.datetime(2018,6,30,23,23,23,2345) #获取了一个 datetime.datetime类的实例化对象，此类继承自 datetime.date类与datetime.time类
+>>>print(isinstance(d,datetime.datetime))  #True
+>>>print(isinstance(d,datetime.date))  #True
+>>>print(isinstance(d,datetime.time))  #False
+此外还拥有一些其独有的新的属性和方法。
+一、	新建一个datetime.datetime对象
+datetime=datetime.datetime(年,月,日[,时[,分[,秒[,微秒[,时区信息]]]]])
+其中年、月、日是必须形参，而后面的都是可选形参，如果不指定后面的可选形参，则后面的值默认为0
+二、	date() 方法
+此方法是datetime.datetime类新增特有的方法，不是继承而来。
+当一个datetime.datetime对象执行此方法时，将返回一个datetime.date对象，此datetime.date对象从原datetime.datetime对象中得到了datetiem.datetime对象的日期部分。
+
+三、	time()方法
+此方法是datetime.datetime类新增特有的方法，不是继承而来。
+当一个datetime.datetime对象执行此方法时，将返回一个datetime.time对象，此datetime.time对象从原datetime.datetime对象中得到了datetiem.datetime对象的时间部分。
+
+四、	combine(date,time) 方法
+此方法是datetime.datetime类新增特有的方法，不是继承而来。
+此方法是datetime.datetime类中的一个共享方法，可通过类名直接调用，无须实例化的对象调用。
+执行此方法将会把一个datetime.date对象和一个datetime.time对象合并成一个datetime.datetime对象，方法将返回合并后得到的datetime.datetime对象。
+测试如下：
+>>> import datetime
+>>> dt=datetime.datetime(2018,12,3,23,22,21,8769)
+>>> print(dt)
+2018-12-03 23:22:21.008769
+>>> d=dt.date()
+>>> print(d)
+2018-12-03
+>>> t=dt.time()
+>>> print(t)
+23:22:21.008769
+>>> dt2=datetime.datetime.combine(d,t)
+>>> print(dt2)
+2018-12-03 23:22:21.008769
+五、	today()  now()
+此两个方法经过了datetime.datetime类的重写，功能一样，执行时直接使用类名调用，无需实例化对象调用。
+执行此方法将返回一个datetime.datetime对象实例，其值为执行此方法当时的日期和时间。
+
+六、	strptime(string,formatstring)
+此方法执行时直接使用类名调用，无需实例化对象调用。
+执行此方法将把一个描述日期的string字符串，按formatstring描述的string字符中的标识 字符的样式，转换成一个真正的datetime.datetime对象。
+测试：
+>>> strD='2018-12-03 23:22:21'
+>>> dt3=datetime.datetime.striptime(strD,'%Y-%m-%d %H:%M:%S')
+>>> dt3=datetime.datetime.strptime(strD,'%Y-%m-%d %H:%M:%S')
+>>> print(dt3)
+2018-12-03 23:22:21
+
+七、	fromtimestamp(timestamp)
+此方法执行时直接使用类名调用，无需实例化对象调用。
+执行此方法将把一个time模块的时间戳对象（timestamp）对象转换为datetime.datetime对象。
+
+八、strftime(formatstring)   __format__(formatstring)
+当一个datetime.datetime对象执行此方法时，将把当前datetime.datetime对象按formatstring字符串描述的日期时间格式转换为字符串。
+测试：
+>>> import datetime
+>>> dt=datetime.datetime(2018,12,3,23,22,21,8769)
+>>> strTemp=dt.strftime('%m.%d %H:%M')
+>>> print(strTemp)
+12.03 23:22
+
+我的qq号：578652607 微信: dalingshu
+
+就是要学  社群  www.941xue.com/index.aspx 
+ 原文地址：http://www.941xue.com/content.aspx?id=276   
+本笔记在B站上的视频地址：      https://www.bilibili.com/video/BV1vt411S7be/ 
+
+【欢迎大家加入[就是要学]社群】
+如今，这个世界的变化与科技的发展就像一个机器猛兽，它跑得越来越快，跑得越来越快，在我们身后追赶着我们。
+很多人很早就放弃了成长，也就放弃了继续奔跑，多数人保持终身不变的样子，原地不动，成为那猛兽的肚中餐——当然那也不错，在猛兽的逼迫下，机械的重复着自我感觉还良好地稳定工作与生活——而且多半感觉不到这有什么不正常的地方，因为在猛兽肚子里的是大多数人，就好像大多数人都在一个大坑里，也就感觉不出来这是一个大坑了，反而坑外的世界显得有些不大正常。
+为什么我们不要做坑里的大多数人？
+因为真正的人生，应当有百万种可能 ；因为真正的一生可以有好多辈子组成，每一辈子都可以做自己喜欢的事情；因为真正的人生，应当有无数种可以选择的权利，而不是总觉得自己别无选择。因为我们要成为一九法则中为数不多的那个一；因为我们要成为自己人生的导演而不是被迫成为别人安排的戏目中的演员。
+【请注意】
+就是要学社群并不会告诉你怎样一夜暴富！也不会告诉你怎样不经努力就实现梦想！
+【请注意】
+就是要学社群并没有任何可以应付未来一切变化的独门绝技，也没有值得吹嘘的所谓价值连城的成功学方法论！
+【请注意】
+社群只会互相帮助，让每个人都看清自己在哪儿，自己是怎样的，重新看见心中的梦想，唤醒各自内心中的那个英雄，然后勇往直前，成为自己想要成为的样子！
+期待与你并肩奔赴未来！
+www.941xue.com 
+QQ群：646854445 （【就是要学】终身成长）
+ 
+
+
+我的学习过程录像百度盘地址分享如下：（清晰度：1280x720）
+链接：https://pan.baidu.com/s/1u1ejxEpquIkT8aa0BQ4saw  密码：j9wx
+
+喜马拉雅语音笔记：
+https://www.ximalaya.com/keji/19103006/142760036 
+
+在B站上的专辑入口（需要找到今天发布的，因为部分天没有发布成功）：
+https://www.bilibili.com/video/av35310701/ 
+
+
+
+
+
+
+
+

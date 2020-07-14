@@ -1,0 +1,131 @@
+datetime.timedelta模块是一个表示 时间长度的 类，不是之前datetime.datetime那样的 表示 时间点（时刻点）的类。
+
+一、	怎样得到一个datetime.timedelta对象
+（一）	方法一：两个表示时刻点的日期时间对象直接进行减法运算就会得到一个datetime.timedelta对象。
+注意：datetime.date对象之间、datetime.datetime对象之间可以进行同种类对象的减法运算。但datetime.time对象不能进行减法运算。
+（二）	方法二：通过三个类的对象都有的：__sub__  __rsub__方法进行减法运算。
+测试：
+import time
+import datetime
+#表示时间长度的对象 datetime.timedelta类
+
+d1=datetime.datetime(2018,7,1,22,34,43,998) #d1是一个datetime.datetime类的对象
+d2=datetime.datetime(2018,7,2,23,54,23,766)
+
+tdt1=d2-d1 #通过两个时刻点的时间对象的相减操作，可以获取一个datetime.timedelta类的对象
+tdt2=d2.__sub__(d1) #作用等同于d2-d1
+上面测试例子中得到的：tdt1,tdt2都是datetime.timedelta对象。
+
+（三）	直接将类datetime.timedelta实例化为一个datetime.timedelta对象;
+新datetime.timedelta对象=datetime.timedelta(时间单位=数量)
+时间单位可以是：
+days  天
+hours  时
+minutes　分
+seconds 秒
+microseconds 微秒
+注意此类的初始化方法的参数是一个关键字参数，必须以关键字赋值的方法传递实参给形参。
+测试：
+import time
+import datetime
+#表示时间长度的对象 datetime.timedelta类
+
+d1=datetime.datetime(2018,7,1,22,34,43,998) #d1是一个datetime.datetime类的对象
+d2=datetime.datetime(2018,7,2,23,54,23,766)
+
+tdt1=d2-d1 #通过两个时刻点的时间对象的相减操作，可以获取一个datetime.timedelta类的对象
+tdt2=d2.__sub__(d1) #作用等同于d2-d1
+
+#通过的类的初始化建构一个 时长类 的对象
+tdt3=datetime.timedelta(hours=8) #传递的实参是 关键字参数 方法传递的，即 时间单位的复数单词=具体的数字，表达是  具体的数字 时间单位
+#此处的关键字参数中的关键字只有：days  hours   minutes  seconds microseconds
+print(tdt1)
+print(tdt2)
+print(tdt3)
+运行结果：
+1 day, 1:19:39.999768
+1 day, 1:19:39.999768
+8:00:00
+
+二、	datetime.timedelta对象的常见属性
+days
+此属性返回datetime.timedelta对象中表示的时间长度的天数部分
+microseconds
+此属性返回datetime.timedelta对象中表示的时间长度的微秒数部分
+此值将大于等于0秒，但小于1秒。
+seconds
+此属性返回datetime.timedelta对象中表示的时间长度的秒数部分
+此值将大于等于0秒，但小于1天。
+注意没有：时、分数的属性！只能通过换算seconds属性值来得到。
+测试：
+import datetime
+#表示时间长度的对象 datetime.timedelta类
+
+d1=datetime.datetime(2018,7,1,22,34,43,998) #d1是一个datetime.datetime类的对象
+d2=datetime.datetime(2018,7,2,23,54,23,766)
+
+tdt1=d2-d1 #通过两个时刻点的时间对象的相减操作，可以获取一个datetime.timedelta类的对象
+tdt2=d2.__sub__(d1) #作用等同于d2-d1
+
+#通过的类的初始化建构一个 时长类 的对象
+tdt3=datetime.timedelta(hours=8) #传递的实参是 关键字参数 方法传递的，即 时间单位的复数单词=具体的数字，表达是  具体的数字 时间单位
+#此处的关键字参数中的关键字只有：days  hours   minutes  seconds microseconds
+
+print(tdt1.days) #时长中的天的部分 = 1
+print(tdt1.seconds) #时长中的秒的部分,不是时长总的秒数,只是时长中，秒的部分，=4779 （约80分钟）
+print(tdt3.microseconds) #时长中的 微秒 部分，=999768 （接近1秒）
+运算结果：
+1
+4779
+0
+
+三、	datetime.timedelta对象可以直接和datetime.datetime对象进行加减运算。
+返回值仍然是一个新的datetime.datetime对象。
+测试：
+import time
+import datetime
+#表示时间长度的对象 datetime.timedelta类
+
+d1=datetime.datetime(2018,7,1,22,34,43,998) #d1是一个datetime.datetime类的对象
+d2=datetime.datetime(2018,7,2,23,54,23,766)
+
+tdt1=d2-d1 #通过两个时刻点的时间对象的相减操作，可以获取一个datetime.timedelta类的对象
+tdt2=d2.__sub__(d1) #作用等同于d2-d1
+
+#通过的类的初始化建构一个 时长类 的对象
+tdt3=datetime.timedelta(hours=8) #传递的实参是 关键字参数 方法传递的，即 时间单位的复数单词=具体的数字，表达是  具体的数字 时间单位
+#此处的关键字参数中的关键字只有：days  hours   minutes  seconds microseconds
+
+d3=d1+tdt1 #d1是一个datetime.datetime对象，tdt1是一个datetime.timedelta对象，直接相加，返回一个新的datetime.datetime对象
+print(d3)
+运行结果：
+2018-07-02 23:54:23.000766
+
+我的qq号：578652607 微信: dalingshu
+
+就是要学  社群  www.941xue.com/index.aspx 
+ 原文地址：http://www.941xue.com/content.aspx?id=1280     
+本笔记在B站上的视频地址：      https://www.bilibili.com/video/BV1Bt411S7JG/  
+
+【欢迎大家加入[就是要学]社群】
+如今，这个世界的变化与科技的发展就像一个机器猛兽，它跑得越来越快，跑得越来越快，在我们身后追赶着我们。
+很多人很早就放弃了成长，也就放弃了继续奔跑，多数人保持终身不变的样子，原地不动，成为那猛兽的肚中餐——当然那也不错，在猛兽的逼迫下，机械的重复着自我感觉还良好地稳定工作与生活——而且多半感觉不到这有什么不正常的地方，因为在猛兽肚子里的是大多数人，就好像大多数人都在一个大坑里，也就感觉不出来这是一个大坑了，反而坑外的世界显得有些不大正常。
+为什么我们不要做坑里的大多数人？
+因为真正的人生，应当有百万种可能 ；因为真正的一生可以有好多辈子组成，每一辈子都可以做自己喜欢的事情；因为真正的人生，应当有无数种可以选择的权利，而不是总觉得自己别无选择。因为我们要成为一九法则中为数不多的那个一；因为我们要成为自己人生的导演而不是被迫成为别人安排的戏目中的演员。
+【请注意】
+就是要学社群并不会告诉你怎样一夜暴富！也不会告诉你怎样不经努力就实现梦想！
+【请注意】
+就是要学社群并没有任何可以应付未来一切变化的独门绝技，也没有值得吹嘘的所谓价值连城的成功学方法论！
+【请注意】
+社群只会互相帮助，让每个人都看清自己在哪儿，自己是怎样的，重新看见心中的梦想，唤醒各自内心中的那个英雄，然后勇往直前，成为自己想要成为的样子！
+期待与你并肩奔赴未来！
+www.941xue.com 
+QQ群：646854445 （【就是要学】终身成长）
+ 
+
+我的学习过程录像百度盘地址分享如下：（清晰度：1280x720）
+链接：https://pan.baidu.com/s/18yNvSFJNb0pqEtE3eB1pYA  密码：lo1v
+Bilibili:
+https://www.bilibili.com/video/av37644133/ 
+喜马拉雅语音笔记：
+https://www.ximalaya.com/keji/19103006/143032429 

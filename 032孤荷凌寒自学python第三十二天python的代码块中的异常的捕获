@@ -1,0 +1,113 @@
+今天简单了解了Python的错误陷阱，了解到其与过去学过的其它语言非常类似，也是使用try……catch……语句块来实现的。
+在代码编写过程中，由于人的思维的不够严密，再优秀的程序员也无法保证自己一点错误都不出，因此，程序中的错误代码是经常存在的。
+在程序运行中，由于参数和环境的改变，运算过程中发生异常也是常见的情况。
+但如果程序在中途出现异常错误，而无法自行解决时，就会造成程序整个中断运行，这种情况叫做程序的健壮性太差（不够健康，轻而易举就挂掉了）。
+于是几乎所有的编程语言都有一套异常捕获和处理的机制，简单说就是一套错误陷阱，我们主动安排错误的陷阱，通过错误陷阱的代码捉住错误，然后处理掉错误，这就使程序的健壮性大大提高了。
+python的异常捕获与处理语句的格式如下：
+try:
+	此代码块是执行正常的需要执行的操作。
+except  错误类别名(异常类名)[,可以是多个错误类别名的列表]:
+	针对列出的错误类别或异常类名而捕获到的错误异常进行处理的代码块。 
+except  (多个异常类名的列表) as e:
+	e代表列表中的多个异常类名对应的具体异常对象实体。
+	在此代码真中直接对e进行操作处理即可。
+except:
+	因为没有指定要捕获的异常类名。
+	则可以捕获所有异常类的实体对象，
+	因此称为全捕捉。
+	此处的代码块就处理所有异常。
+else:
+	如果整个程序块完全没有发生错误异常，
+	就会执行此处的代码块。
+finally:
+	不管前面的代码情况如何 ，
+	此代码块是一定会被执行的。
+
+测试：
+try:
+    print('hello world!')
+except SystemError as e:
+    print("一般系统错误\n",e)
+except AttributeError as e:
+    print("引用属性错误\n",e)
+except IOError as e :
+    print("输入输出错误\n",e)
+except IndexError as e:
+    print("索引错误\n",e)
+except KeyError as e:
+    print("不存在键\n",e)
+except NameError as e:
+    print("引用或声明错误\n",e)
+except ValueError as e:
+    print("参数值错误\n",e)
+except:
+    print("出了其它错了")
+else:
+    print("继续运行")
+finally:
+    print("执行收尾工作")
+
+运行结果：
+hello world!
+继续运行
+执行收尾工作
+本次运行，没有捕获任何错误异常。
+继续测试：
+try:
+    print(hello world!)
+except SystemError as e:
+    print("一般系统错误\n",e)
+except AttributeError as e:
+    print("引用属性错误\n",e)
+except IOError as e :
+    print("输入输出错误\n",e)
+except IndexError as e:
+    print("索引错误\n",e)
+except KeyError as e:
+    print("不存在键\n",e)
+except NameError as e:
+    print("引用或声明错误\n",e)
+except ValueError as e:
+    print("参数值错误\n",e)
+except:
+    print("出了其它错了")
+else:
+    print("继续运行")
+finally:
+    print("执行收尾工作")
+运行结果：
+出了其它错了
+执行收尾工作
+我的qq号：578652607 微信: dalingshu
+
+就是要学  社群  www.941xue.com/index.aspx 
+ 原文地址：http://www.941xue.com/content.aspx?id=1290    
+本笔记在B站上的视频地址：      https://www.bilibili.com/video/BV1Bt411S7jb/   
+Github:
+https://github.com/lhghroom/ZeroBasicSelfStudyPython 
+
+【欢迎大家加入[就是要学]社群】
+如今，这个世界的变化与科技的发展就像一个机器猛兽，它跑得越来越快，跑得越来越快，在我们身后追赶着我们。
+很多人很早就放弃了成长，也就放弃了继续奔跑，多数人保持终身不变的样子，原地不动，成为那猛兽的肚中餐——当然那也不错，在猛兽的逼迫下，机械的重复着自我感觉还良好地稳定工作与生活——而且多半感觉不到这有什么不正常的地方，因为在猛兽肚子里的是大多数人，就好像大多数人都在一个大坑里，也就感觉不出来这是一个大坑了，反而坑外的世界显得有些不大正常。
+为什么我们不要做坑里的大多数人？
+因为真正的人生，应当有百万种可能 ；因为真正的一生可以有好多辈子组成，每一辈子都可以做自己喜欢的事情；因为真正的人生，应当有无数种可以选择的权利，而不是总觉得自己别无选择。因为我们要成为一九法则中为数不多的那个一；因为我们要成为自己人生的导演而不是被迫成为别人安排的戏目中的演员。
+【请注意】
+就是要学社群并不会告诉你怎样一夜暴富！也不会告诉你怎样不经努力就实现梦想！
+【请注意】
+就是要学社群并没有任何可以应付未来一切变化的独门绝技，也没有值得吹嘘的所谓价值连城的成功学方法论！
+【请注意】
+社群只会互相帮助，让每个人都看清自己在哪儿，自己是怎样的，重新看见心中的梦想，唤醒各自内心中的那个英雄，然后勇往直前，成为自己想要成为的样子！
+期待与你并肩奔赴未来！
+www.941xue.com 
+QQ群：646854445 （【就是要学】终身成长）
+ 
+
+
+我的学习过程录像百度盘地址分享如下：（清晰度：1280x720）
+链接：https://pan.baidu.com/s/1HO9ZRA46_Fo_RvLhT7Ybow  密码：jcsw
+
+Bilibili:
+https://www.bilibili.com/video/av37644283/ 
+
+喜马拉雅语音笔记：
+https://www.ximalaya.com/keji/19103006/143326261 

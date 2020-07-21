@@ -1,0 +1,103 @@
+孤荷凌寒自学python第三十四天python的文件操作对file类的对象学习
+
+（完整学习过程屏幕记录视频地址在文末，手写笔记在文末）
+一、	close() 
+当一个file对象执行此方法时，将关闭当前打开的文件。
+关闭后的文件不能再进行任何操作。
+
+二、	seek()
+当用python的内置函数open打开了一个磁盘文件后，当前指针是固定在打开的file对象的指定位置的，而当我们想要移动指针时，就可以使用file对象的seek()方法。
+语法：file.seek(offset[, whence])
+offset:要行进的字节数。
+whence:表示从哪个位置开始行进。默认,值是0，从文件的开始处偏移，1代表从当前位置开始算起，2代表从文件末尾算起。
+file.seek(0,0):设置文件的读取指针到开头
+file.seek(0,2):设置文件的读取指针到结尾
+
+三、	read() 
+语法：
+str=file.read([count])
+此方法用于从文件读取指定的字节数，如果未给定count的实参或为负则读取文件中的所有字节。
+一般情况下，都得指定count的实参，因为当文件足够大时，不指定实参将造成内存不够用。
+
+四、	readline()
+语法：
+str=file.readline([count])
+此方法每次从file对象的当前指针位置读取文件中的一行内容。
+注意可选参数count并不是指一次读取count行！！
+可选形参count是指读取一行中的从左边数起的count个字符的内容。
+如果不指定形参count的实参，则读取完整的一行内容。
+不管是否从文件中读取了完整的一行内容，readline方法返回的字符串的末尾都有’\n’字符。
+
+五、	readlines()
+此方法没有形式参数。
+当file对象执行此方法时，将返回文件中所有的行，每行内容的末尾都有’\n’字符（最后一行除外）,每行内容的字符串作为返回的列表对象中的一个元素。
+所以说此方法返回的是一个列表对象。
+
+六、	write()
+语法：
+int=file.write(string)
+当file对象执行此方法时，会将string写入到file当前指针所在的位置，不会自动在string的末尾添加’\n’符号。
+此方法的返回值是一个数字，表示总共写入了多少字符。
+
+七、	writelines()
+语法：
+int=file.writlines(字符串列表)
+当file对象执行此方法时，将向file对象当前指针位置，写入字符串列表中的全部元素中的字符串，但也不会自动在每个字符串后添加’\n’
+
+最后整体测试了一遍：
+strfile='1.txt'
+try:
+    f=open(strfile,'w',encoding='utf-8')
+    strlst=['第一行\n','第二行\n','第三行\n']
+    f.writelines(strlst)
+    f.close() #写完之后，先关闭，然后再打开才能看到文件内容的变化 ，如果直接写完就读，就算使用w+模式都是失败的。
+
+except (AttributeError,IOError,IndexError,KeyError,NameError,SystemError,SyntaxError,ValueError) as e:
+    print(e)
+else:
+    f=open(strfile,'r',encoding='utf-8') #专门以r模式打开来读取内容。
+    strlst=f.readlines()
+    print(strlst)
+finally:
+    try:
+        f.close()
+    except (AttributeError,IOError,IndexError,KeyError,NameError,SystemError,SyntaxError,ValueError) as e:
+        print(e)
+运行结果：
+['第一行\n', '第二行\n', '第三行\n']
+
+
+我的qq号：578652607 微信: dalingshu
+
+就是要学  社群  www.941xue.com/index.aspx 
+ 原文地址：http://www.941xue.com/content.aspx?id=1311    
+本笔记在B站上的视频地址：      https://www.bilibili.com/video/BV1Bt411S7Tm/   
+Github:
+https://github.com/lhghroom/ZeroBasicSelfStudyPython 
+
+【欢迎大家加入[就是要学]社群】
+如今，这个世界的变化与科技的发展就像一个机器猛兽，它跑得越来越快，跑得越来越快，在我们身后追赶着我们。
+很多人很早就放弃了成长，也就放弃了继续奔跑，多数人保持终身不变的样子，原地不动，成为那猛兽的肚中餐——当然那也不错，在猛兽的逼迫下，机械的重复着自我感觉还良好地稳定工作与生活——而且多半感觉不到这有什么不正常的地方，因为在猛兽肚子里的是大多数人，就好像大多数人都在一个大坑里，也就感觉不出来这是一个大坑了，反而坑外的世界显得有些不大正常。
+为什么我们不要做坑里的大多数人？
+因为真正的人生，应当有百万种可能 ；因为真正的一生可以有好多辈子组成，每一辈子都可以做自己喜欢的事情；因为真正的人生，应当有无数种可以选择的权利，而不是总觉得自己别无选择。因为我们要成为一九法则中为数不多的那个一；因为我们要成为自己人生的导演而不是被迫成为别人安排的戏目中的演员。
+【请注意】
+就是要学社群并不会告诉你怎样一夜暴富！也不会告诉你怎样不经努力就实现梦想！
+【请注意】
+就是要学社群并没有任何可以应付未来一切变化的独门绝技，也没有值得吹嘘的所谓价值连城的成功学方法论！
+【请注意】
+社群只会互相帮助，让每个人都看清自己在哪儿，自己是怎样的，重新看见心中的梦想，唤醒各自内心中的那个英雄，然后勇往直前，成为自己想要成为的样子！
+期待与你并肩奔赴未来！
+www.941xue.com 
+QQ群：646854445 （【就是要学】终身成长）
+ 
+
+
+我的学习过程录像百度盘地址分享如下：（清晰度：1280x720）
+链接：https://pan.baidu.com/s/1KADXObQYPwhWEbGDgB2p-g  密码：32wd
+
+Bilibili:
+https://www.bilibili.com/video/av37643763/ 
+
+喜马拉雅语音笔记：
+https://www.ximalaya.com/keji/19103006/143841027 
+

@@ -1,0 +1,359 @@
+孤荷凌寒自学python第三十五天python的文件操作之针对文件操作的os模块的相关内容
+
+（完整学习过程屏幕记录视频地址在文末，手写笔记在文末）
+一、	打开文件后，要务必记得关闭，所以一般的写法应当放在异常捕捉环境中。
+try:
+	此处放打开文件的语句块 f= open(文件,‘打开模式’,encoding=’文本编码’)
+	执行打开文件后的操作语句块
+except ……:
+	……
+else:
+	这儿可以继续放其它要执行的正常语句块
+finally:
+	这儿必须有关闭文件的语句。f.close()
+
+但我们可以简化地写成：
+with open(文件,‘打开模式’,encoding=’文本编码’) as f:
+	此处就可以对f对象（就是一个file对象）进行操作了
+
+使用这种方法的话，是完全不用书写关闭文件的语句的。
+
+二、	os模块中对于文件操作的相关子模块
+os模块中的子模块：os.path模块
+必须先引用声明后才能使用，引用方式：
+import os.path
+os.path类下的大部分方法都直接可以通过类名调用，无需将类实例化为具体的对象。
+1 
+os.path.abspath(相对文件路径名)
+相对文件路径名，是针对于绝对路径文件名（完整路径文件名而言）的
+相对文件路径如：
+1.txt
+上面的文件路径，默认就是此当前目录 下的1.txt
+但我们并不知道其完整的路径名。
+而绝对路径（完整路径文件名）如：
+windows系统下：
+I:\MAKEAPP\python\Python365\边学习边测试文件夹\自学PYTHON部分\0035第三十五天\1.txt
+linux系统下：
+/home/pw/eclipse-workspace/py1/1.txt
+
+此方法返回文件的完整路径和文件名。
+
+2 
+os.path.dirname(绝对文件路径或绝对文件夹路径)
+执行此方法将返回绝对路径中上级目录（上一级文件夹）的绝对路径。
+
+3
+os.path.basename(绝对文件路径或绝对文件夹路径)
+执行此方法 将返回绝对路径中的 相对文件名 或 相对文件夹名
+
+4
+os.path.exists(文件名或目录名)
+执行此方法  将返回指定的文件名或目录名是否存在的布尔对象。
+
+5
+os.path.isabs(文件或目录名)
+执行此方法  将返回指定的文件名称或目录 名是否是绝对路径的布尔对象。
+
+6
+os.path.isfile(文件名或目录名)
+执行此方法  将返回指定的文件名或目录名 是否是 一个文件  的布尔对象。
+
+7
+os.path.isdir(文件名或目录名)
+执行此方法 将返回指定的文件名或目录名 是否是 一个文件夹 的布尔对象。
+
+8
+os.path.getsize(文件名)
+执行此方法 将返回指定的文件名的文件的占用磁盘空间的大小，单位为byte.
+
+9
+os.path.split(绝对文件名或绝对目录名)
+执行此方法 将把绝对文件名分成两部分：上一级文件夹名 和 纯粹的相对文件名
+并将这两部分组合成一个元组对象后返回。
+
+10
+os.path.splitdive(绝对文件名或绝对目录名)
+执行此方法 将把绝对文件名分成两部分： 盘符  和 除开盘符之外的部分
+并将这两部分组合成一个元组对象后返回。
+对于linux系统而言是没有盘符的，因此，盘符部分为空字符串。
+
+11
+os.path.join(绝对路径的文件夹名,纯粹的相对文件名)
+执行此方法 将把【绝对路径的文件夹名】与【纯粹的相对文件名】组合成一个完整的绝对路径。
+
+特别注意：
+【绝对路径的文件夹名】中的所有/符号必须有两种情况：
+可以直接使用下边左移的的斜杠
+/
+如果使用下边右移的斜杠
+\
+就必须转义表达为：
+\\
+否则执行此方法不会成功。
+经测试传递给本方法的第一个形参的下列写法是正确的:
+I:\\MAKEAPP\\python\\Python365\\边学习边测试文件夹\\自学PYTHON部分\\0035第三十五天\\ 
+/home/pw/eclipse-workspace/py1
+
+执行下面的语句进行测试：（win10下使用vscode环境）
+import os.path
+
+strfile='1.txt'
+strLongPath=os.path.abspath(strfile)
+print(strLongPath)
+strShortNm=os.path.basename(strLongPath)
+print(strShortNm)
+strDirNm=os.path.dirname(strLongPath)
+print(strDirNm)
+strShortDirNm=os.path.basename(strDirNm)
+print(strShortDirNm)
+isHad=os.path.exists(strfile)
+print(isHad)
+isHad=os.path.exists(strLongPath)
+print(isHad)
+isHad=os.path.exists(strDirNm)
+print(isHad)
+isHad=os.path.exists(strShortDirNm)
+print(isHad)
+isHad=os.path.exists('../' + strShortDirNm)
+print(isHad)
+intSize=os.path.getsize(strfile)
+print(intSize)
+isAbs=os.path.isabs(strfile)
+print(isAbs)
+isAbs=os.path.isabs(strLongPath)
+print(isAbs)
+isFile=os.path.isfile(strfile)
+print(isFile)
+isFile=os.path.isfile(strDirNm)
+print(isFile)
+strOnlyPath=os.path.splitdrive(strLongPath)
+strOnlyFile=os.path.split(strLongPath)
+print(strOnlyPath)
+print(strOnlyFile)
+strTemp=os.path.join(strOnlyFile[0],strOnlyFile[1])
+print(strTemp)
+strLs=os.path.join('I:\\MAKEAPP\\python\\Python365\\边学习边测试文件夹\\自学PYTHON部分\\0035第三十五天\\','1.txt')
+print(strLs)
+
+运行结果：
+I:\MAKEAPP\python\Python365\边学习边测试文件夹\自学PYTHON部分\0035第三十五天\1.txt
+1.txt
+I:\MAKEAPP\python\Python365\边学习边测试文件夹\自学PYTHON部分\0035第三十五天
+0035第三十五天
+True
+True
+True
+False
+True
+34
+False
+True
+True
+False
+('I:', '\\MAKEAPP\\python\\Python365\\边学习边测试文件夹\\自学PYTHON部分\\0035第三十五天\\1.txt')
+('I:\\MAKEAPP\\python\\Python365\\边学习边测试文件夹\\自学PYTHON部分\\0035第三十五天', '1.txt')
+I:\MAKEAPP\python\Python365\边学习边测试文件夹\自学PYTHON部分\0035第三十五天\1.txt
+I:\MAKEAPP\python\Python365\边学习边测试文件夹\自学PYTHON部分\0035第三十五天\1.txt
+
+执行下面的语句，在linux（fedora）系统eclipse环境下测试：
+import os.path
+import shutil
+
+strfile='1.txt'
+with open(strfile,'w',encoding='utf-8') as f:
+    lstA=['孤荷凌寒\n','QQ号是_\n','578652607']
+    f.writelines(lstA)
+isHad=os.path.exists(strfile)
+print(isHad)
+strpath=os.path.dirname(strfile)
+print(strpath)
+strlongfile=os.path.abspath(strfile)
+print(strlongfile)
+strpath=os.path.dirname(strlongfile)
+print(strpath)
+tplB=os.path.split(strlongfile)
+tplC=os.path.splitdrive(strlongfile)
+print(tplB)
+print(tplC)
+strfile2=os.path.join(tplB[0],tplB[1])
+print(strfile2)
+strfile2=os.path.join('\\home\\pw\\eclipse-workspace\\py1',tplB[1])
+print(strfile2)
+输出结果：
+True
+/home/pw/eclipse-workspace/py1/1.txt
+/home/pw/eclipse-workspace/py1
+ ('/home/pw/eclipse-workspace/py1', '1.txt')
+ ('', '/home/pw/eclipse-workspace/py1/1.txt')
+/home/pw/eclipse-workspace/py1/1.txt
+\home\pw\eclipse-workspace\py1/1.txt
+
+三、	os模块中的其它文件操作方法
+os.walk(目录名)
+执行此方法将返回从【目录名】开始的全部文件树的迭代器。
+文件树中，包含：
+所有目录
+所有子级目录 
+每个目录中的文件
+三大类的信息集合。
+如果将此迭代器强制转换为list(列表)，则会显示成一个复杂的嵌套列表。
+一般可以通过如下方法遍历此 迭代器的所有对象：
+for dir,subdir,f in tree:
+	……
+其中tree就是指执行此方法后返回的迭代器。
+循环体中的dir将依次获得每循环次的当前目录名，subdir将依次获得每循环次的子目录名列表,f将依次获得每循环次的文件名列表。
+在windows下执行下面的操作：
+import os.path
+#import os.walk  #没有这个模块！因为walk只是os中的一个方法
+import shutil #这才是一个模块，专门用于文件操作的，需要引用
+
+import glob
+
+strfile='1.txt'
+strlongfile=os.path.abspath(strfile)
+strpath=os.path.dirname(strlongfile)
+print(strpath)
+objA=os.walk(strpath) #将列出strpath中的全部文件夹和文件,包括子目录中的，形成一棵树，返回的是一个迭代器
+for dir,subdir,f in objA:
+    print(dir)
+    print(subdir)
+    print(f)
+
+运行结果：
+I:\MAKEAPP\python\Python365\边学习边测试文件夹\自学PYTHON部分\0035第三十五天
+I:\MAKEAPP\python\Python365\边学习边测试文件夹\自学PYTHON部分\0035第三十五天
+['.idea', 'a']
+['1.txt', '3.txt', '4.txt', '5.txt', '6.txt', 'ghlh_python_35th_文件操作_os模块中有关文件操作的方法(一）.py', 'ghlh_python_35th_文件
+操作_os模块中有关文件操作的方法(一）的运算结果.txt', 'ghlh_python_35th_文件操作_os模块中有关文件操作的方法(二）.py', 'ghlh_python_35th_文件操作_在linux系统下的测试.py', 'ghlh_python_35th_文件操作_在linux系统下的测试的运算结果.txt', 'ghlh_python_35th_文件操作_通过with语句来打开文件.py']
+I:\MAKEAPP\python\Python365\边学习边测试文件夹\自学PYTHON部分\0035第三十五天\.idea
+['libraries']
+['misc.xml', 'modules.xml', 'workspace.xml', '第三十四天.iml']
+I:\MAKEAPP\python\Python365\边学习边测试文件夹\自学PYTHON部分\0035第三十五天\.idea\libraries
+[]
+['R_User_Library.xml']
+I:\MAKEAPP\python\Python365\边学习边测试文件夹\自学PYTHON部分\0035第三十五天\a
+['b', 'c']
+['4.txt']
+I:\MAKEAPP\python\Python365\边学习边测试文件夹\自学PYTHON部分\0035第三十五天\a\b
+['d']
+['2.txt']
+I:\MAKEAPP\python\Python365\边学习边测试文件夹\自学PYTHON部分\0035第三十五天\a\b\d
+[]
+['1.txt']
+I:\MAKEAPP\python\Python365\边学习边测试文件夹\自学PYTHON部分\0035第三十五天\a\c
+[]
+['3.txt']
+在linux(fedora)下执行下列操作：
+obj=os.walk('\\home\\pw\\eclipse-workspace\\py1')
+lstD=list(obj)
+print(lstD)
+运行结果：
+[('/home/pw/eclipse-workspace/py1', ['__pycache__'], ['.project', 'firstpage.py', '.pydevproject', '3.txt', '1.txt']), ('/home/pw/eclipse-workspace/py1/__pycache__', [], ['firstpage.cpython-36.pyc'])]
+
+四、	shutil模块
+使用shutil模块前必须声明引用：
+import shutil
+主要方法如下：
+1
+copyfile(源文件名,目标文件名)
+copy(源文件名,目标文件名)
+copy2(源文件名,目标文件名)
+上面三个操作都可以完成文件复制操作，但区别如下：
+copyfile只复制了文件的内容，而文件的属性和权限标识等都没有复制；
+copy只复制了文件的内容和权限标识，但没有复制文件的属性；
+copy2完全复制了文件的全部信息，包括文件内容，文件的属性与文件的权限标识。
+如果源文件不存在 ，将报错！
+【注意】
+经测试，在windows下没有发现三个的太大区别，特别是属性当中的【隐藏】属性；此外windows下设置的用户权限在三个复制命令中，都没有得到复制。
+在linux下的操作区别较为明显。
+
+2
+copytree(源文件夹名,目标文件夹名)
+此方法将完整的复制指定的文件夹到目标文件夹，包含所有子文件夹和文件树。
+如果源文件夹不存在 ，将报错！
+
+3
+rmtree(要删除的文件夹名)
+此方法将完全删除指定的文件夹，同时也就删除了指定文件夹下的所有子文件夹和文件树。
+如果要删除的文件夹不存在 ，将报错！
+
+4
+move(源文件名或源文件夹名,目标文件名或文件夹名)
+此方法将移动源文件到目标文件位置。
+如果要移动的源不存在，将报错。
+
+五、	查找出指定目录下（不包含子目录）的符合筛选特征的文件列表
+引用声明：
+import glob
+使用glob模块的glob()方法可以列出符合筛选条件的文件列表，返回的是绝对文件名组成的迭代器：
+1
+glob.glob(筛选条件的文件名的纯文件名部分没有路径信息)
+这种方法是指在当前Py文件的当前目录下查找符合【筛选条件的文件名】列表
+筛选字符串支持通配符号：*
+2
+glob.glob(指定的盘符及路径同时指定筛选文件名)
+这时相当于指定了绝对路径
+这两种情况都只传递了一个参数。
+如果指定的文件夹不存在 ，将报错。
+测试如下：
+files=glob.glob('*.txt')
+for a in files:
+    print(a)
+print('----下面是指定绝对路径的测试--------')
+files=glob.glob('I:\\MAKEAPP\\python\\Python365\\边学习边测试文件夹\\自学PYTHON部分\\0035第三十五天\\*.py')
+for a in files:
+    print(a)
+
+运行结果：
+1.txt
+3.txt
+4.txt
+5.txt
+6.txt
+ghlh_python_35th_文件操作_os模块中有关文件操作的方法(一）的运算结果.txt
+ghlh_python_35th_文件操作_在linux系统下的测试的运算结果.txt
+----下面是指定绝对路径的测试--------
+I:\MAKEAPP\python\Python365\边学习边测试文件夹\自学PYTHON部分\0035第三十五天\ghlh_python_35th_文件操作_os模块中有关文件操作的方法(一
+）.py
+I:\MAKEAPP\python\Python365\边学习边测试文件夹\自学PYTHON部分\0035第三十五天\ghlh_python_35th_文件操作_os模块中有关文件操作的方法(二
+）.py
+I:\MAKEAPP\python\Python365\边学习边测试文件夹\自学PYTHON部分\0035第三十五天\ghlh_python_35th_文件操作_在linux系统下的测试.py
+I:\MAKEAPP\python\Python365\边学习边测试文件夹\自学PYTHON部分\0035第三十五天\ghlh_python_35th_文件操作_通过with语句来打开文件.py
+
+
+我的qq号：578652607 微信: dalingshu
+
+就是要学  社群  www.941xue.com/index.aspx 
+ 原文地址：http://www.941xue.com/content.aspx?id=1323    
+本笔记在B站上的视频地址：      https://www.bilibili.com/video/BV1qt411S7fq/   
+Github:
+https://github.com/lhghroom/ZeroBasicSelfStudyPython 
+
+【欢迎大家加入[就是要学]社群】
+如今，这个世界的变化与科技的发展就像一个机器猛兽，它跑得越来越快，跑得越来越快，在我们身后追赶着我们。
+很多人很早就放弃了成长，也就放弃了继续奔跑，多数人保持终身不变的样子，原地不动，成为那猛兽的肚中餐——当然那也不错，在猛兽的逼迫下，机械的重复着自我感觉还良好地稳定工作与生活——而且多半感觉不到这有什么不正常的地方，因为在猛兽肚子里的是大多数人，就好像大多数人都在一个大坑里，也就感觉不出来这是一个大坑了，反而坑外的世界显得有些不大正常。
+为什么我们不要做坑里的大多数人？
+因为真正的人生，应当有百万种可能 ；因为真正的一生可以有好多辈子组成，每一辈子都可以做自己喜欢的事情；因为真正的人生，应当有无数种可以选择的权利，而不是总觉得自己别无选择。因为我们要成为一九法则中为数不多的那个一；因为我们要成为自己人生的导演而不是被迫成为别人安排的戏目中的演员。
+【请注意】
+就是要学社群并不会告诉你怎样一夜暴富！也不会告诉你怎样不经努力就实现梦想！
+【请注意】
+就是要学社群并没有任何可以应付未来一切变化的独门绝技，也没有值得吹嘘的所谓价值连城的成功学方法论！
+【请注意】
+社群只会互相帮助，让每个人都看清自己在哪儿，自己是怎样的，重新看见心中的梦想，唤醒各自内心中的那个英雄，然后勇往直前，成为自己想要成为的样子！
+期待与你并肩奔赴未来！
+www.941xue.com 
+QQ群：646854445 （【就是要学】终身成长）
+ 
+
+
+
+
+我的学习过程录像百度盘地址分享如下：（清晰度：1280x720）
+链接：https://pan.baidu.com/s/1dD1ArqpUO4DHO_Pxw3K5PA  密码：ruem
+
+Bilibili:
+https://www.bilibili.com/video/av37645205/ 
+喜马拉雅语音笔记：
+https://www.ximalaya.com/keji/19103006/144111442 
+
+   

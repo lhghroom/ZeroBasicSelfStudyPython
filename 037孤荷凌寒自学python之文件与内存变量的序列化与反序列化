@@ -1,0 +1,95 @@
+孤荷凌寒自学python第三十七天python的文件与内存变量之间的序列化与反序列化
+github:
+https://github.com/lhghroom/ZeroBasicSelfStudyPython
+
+（完整学习过程屏幕记录视频地址在文末，手写笔记在文末）
+什么是序列化与反序列化
+序列化是指将内存中的数据进行指定规则的格式梳理，使之方便按一定格式保存到文件中。我的理解就是数据在文件中的保存的结构。
+反序列化是指将磁盘中文件的保存的结构读取出来，然后转换为内存中的数据，并且可以在屏幕上输出为人可阅读的格式内容。
+
+pickle模块
+pickle模块是Python 内置的序列化与反序列化类，保存到文件时，是将内存数据以二进制格式保存到文件中的。
+使用pickle模块前必须先声明引用：
+import pickle
+因此读取与保存时，open文件时，都是二进制读取与写入，模式输入要选择rb或wb
+1
+dump() 与 load()
+dump操作是将内存中的数据保存到file对象中并写入磁盘；
+load操作是将file对象中的二进制数据读出并转换为dict。
+pickle.dump(数据变量如字典,file对象)
+字典对象=pickle.load(file对象)
+
+2.dumps()与loads()
+dumps操作是将内存中的数据序列化为byte字节码对象；
+loads操作是将byte字节码对象转换为dict。
+
+测试：
+import pickle
+
+strfile='1.txt'
+f=open(strfile,'wb')
+dictA=dict(姓名='孤荷凌寒',QQ='578652607')
+pickle.dump(dictA,f)
+f.close
+f=open(strfile,'rb')
+dictB=pickle.load(f)
+print(dictB)
+f.close
+执行结果：
+{'姓名': '孤荷凌寒', 'QQ': '578652607'}
+
+json模块
+json模块是国际跨平台通用的json标准的一种序列化和反序列化操作，更具有通用价值。
+使用将也必须先声明引用：
+import  json
+json的主要方法 也pickle的完全一样，但json的读取与写入都是以纯文本方式 进行的，因此open文件时，只能选择的模式是：r 或 w 
+测试如下：
+import json
+
+strfile='2.txt'
+f=open(strfile,'w')
+dictA=dict(姓名='孤荷凌寒',QQ='578652607')
+json.dump(dictA,f)
+f.close
+f=open(strfile,'r')
+dictB=json.load(f)
+print(dictB)
+f.close
+
+运行结果：
+{'姓名': '孤荷凌寒', 'QQ': '578652607'}
+
+我的qq号：578652607 微信: dalingshu
+
+就是要学  社群  www.941xue.com/index.aspx 
+ 原文地址：http://www.941xue.com/content.aspx?id=1334     
+本笔记在B站上的视频地址：      https://www.bilibili.com/video/BV1dt411v7ep/  
+Github:
+https://github.com/lhghroom/ZeroBasicSelfStudyPython 
+
+【欢迎大家加入[就是要学]社群】
+如今，这个世界的变化与科技的发展就像一个机器猛兽，它跑得越来越快，跑得越来越快，在我们身后追赶着我们。
+很多人很早就放弃了成长，也就放弃了继续奔跑，多数人保持终身不变的样子，原地不动，成为那猛兽的肚中餐——当然那也不错，在猛兽的逼迫下，机械的重复着自我感觉还良好地稳定工作与生活——而且多半感觉不到这有什么不正常的地方，因为在猛兽肚子里的是大多数人，就好像大多数人都在一个大坑里，也就感觉不出来这是一个大坑了，反而坑外的世界显得有些不大正常。
+为什么我们不要做坑里的大多数人？
+因为真正的人生，应当有百万种可能 ；因为真正的一生可以有好多辈子组成，每一辈子都可以做自己喜欢的事情；因为真正的人生，应当有无数种可以选择的权利，而不是总觉得自己别无选择。因为我们要成为一九法则中为数不多的那个一；因为我们要成为自己人生的导演而不是被迫成为别人安排的戏目中的演员。
+【请注意】
+就是要学社群并不会告诉你怎样一夜暴富！也不会告诉你怎样不经努力就实现梦想！
+【请注意】
+就是要学社群并没有任何可以应付未来一切变化的独门绝技，也没有值得吹嘘的所谓价值连城的成功学方法论！
+【请注意】
+社群只会互相帮助，让每个人都看清自己在哪儿，自己是怎样的，重新看见心中的梦想，唤醒各自内心中的那个英雄，然后勇往直前，成为自己想要成为的样子！
+期待与你并肩奔赴未来！
+www.941xue.com 
+QQ群：646854445 （【就是要学】终身成长）
+ 
+
+我的学习过程录像百度盘地址分享如下：（清晰度：1280x720）
+链接：https://pan.baidu.com/s/13DY2M8Nw6M9ImYcy7_R7vg  密码：iqd9
+
+Bilibili:
+https://www.bilibili.com/video/av38087923/ 
+
+喜马拉雅语音笔记：
+https://www.ximalaya.com/keji/19103006/144646195 
+
+

@@ -1,0 +1,398 @@
+孤荷凌寒自学python第三十九天python 的线程锁Lock
+
+（完整学习过程屏幕记录视频地址在文末，手写笔记在文末）
+当多个线程同时操作一个文件等需要同时操作某一对象的情况发生时，很有可能发生冲突，因此在这种情况下就只能允许实时只有一个线程在操作这一对象，而其它线程在队列中等待，按排队顺序依次进行，这是我对【线程同步】的初步理解，因此【锁】这个对象就是用于实时只允许一个线程操作多线程大家都要操作的对象而存在的，当一个线程使用开启【锁】对象后到解锁【锁】对象的这段时间，只就允许此线程（是指开启【锁】对象的线程）运行，而其它并行线程等待【锁】的解除后才能运行。
+
+为了控制复杂的多线程，python中有多种不同的锁对象（包括高级锁对象），今天我初步研究了Lock锁对象，因为是自学，果然走了很多弯路，但却觉得非常值得，因为亲身真切地感受了Lock对象的特质，虽然没有完全有把握说100%掌握了Lock对象的使用，但通过实践得来的理解的印象是非常深刻的。
+
+得到Lock锁对象
+新的Lock锁对象=threading.Lock()
+使用Lock类的初始化方法之前，必须保证当前py文档已声明引用过threading模块：
+import threading
+Lock是一个类吗？只知道它其实来自于不被推荐使用的_thread模块中的_thread.allocate_lock,就再也没有线索了，由于很多资料及经验文章中居然都没有明确地指明此东西是什么，我理解好一会儿才估计Lock是一个类。（因为其它锁基本上都是类）这也告诉自己在理解时一定要彻底，表达时一定要用语精准，清晰，这是我发现很多博主写博文时，以前自己以前似乎也是如此，总之只要自己能读懂（实际可能是似懂非懂），就觉得以为自己讲得很清楚了，事实呢，读的人也许就难以理解了，于是我决定以后发表博文等一定要再三检查，并让至少三个人提出初读意见后，再修改，以确定是表达明白了。
+
+Lock对象的主要方法
+Lock对象有两个主要的方法：
+1
+Lock锁对象 . acquire()
+当在指定线程的代码块中执行了锁对象的acquire()方法，那么，此线程将让并行的其它线程处于暂停执行的等待状态中，此线程将独占运行。
+
+2
+Lock锁对象 . release()
+当正在独占运行的线程执行了锁对象的release()方法的时候，就是解除了锁定操作，其它并行线程就可以继续运行了。
+
+测试代码一及事后反复研究推论结果
+不用锁的情况下，两个并行线程操作同一个文件并输出执行时间的测试，使用了来自time模块中的sleep（）方法
+import threading
+from datetime import datetime
+from time import sleep
+
+strf='1.txt'
+
+def read():
+    for n in x:
+        with open(strf,'r',encoding='utf-8') as f:
+            strtime=str(datetime.now())
+
+            lstA=f.readlines()
+            lstA.append('_读取时间：' + strtime)
+            print(lstA)
+
+        sleep(1)
+
+def write():
+    for n in x:
+        with open(strf,'w',encoding='utf-8') as f:
+            strtime=str(datetime.now())
+            lstA=['负责写的进程写入时间：',strtime]
+            print(lstA)
+            f.writelines(lstA)
+        sleep(3)
+
+def main():
+    tread=threading.Thread(target=read)
+    twrite=threading.Thread(target=write)
+    tread.start()
+    twrite.start()
+    tread.join()
+    twrite.join()
+
+if __name__=='__main__':
+    x=range(3)
+    main()
+运行结果：
+['写入时间：2018-08-17 22:14:22.349675', '_读取时间：2018-08-18 22:17:03.589792']
+
+['负责写的进程写入时间：', '2018-08-18 22:17:03.589792']
+
+['负责写的进程写入时间：2018-08-18 22:17:03.589792', '_读取时间：2018-08-18 22:17:04.620917']
+
+['负责写的进程写入时间：2018-08-18 22:17:03.589792', '_读取时间：2018-08-18 22:17:05.683155']
+
+['负责写的进程写入时间：', '2018-08-18 22:17:06.620406']
+
+['负责写的进程写入时间：', '2018-08-18 22:17:09.697863']
+
+从两个线程的执行来看，操作同一个文件没有出现冲突，都写入成功，也都读取成功，且线程是并行运行的（输出结果是交替出现的可以证明）但这并不是线程安全的同步操作方法。
+测试代码二及事后反复研究推论结果
+使用同一把锁的情况下，两个并行线程操作输出执行时间的测试
+import threading
+from datetime import datetime
+from time import sleep
+
+intcount=3
+
+def f1(n):
+
+    lock.acquire() #从本行的下一行起，当前线程将独占运行，其它并行线程将等待本线程的执行
+
+    if n=='t0':
+        sleep(3)
+    elif n=='t1':
+        sleep(2)
+    elif n=='t2':
+        sleep(1)
+    else:
+        pass
+
+
+
+    strtime=str(datetime.now())
+    print('线程' + n + '正在运行中....线程启动于：' + strtime)
+    lock.release() #到本行止，当前线程的独占运行结束，其它并行线程将继续并行运算
+
+def main():
+    threads=[]
+    x=range(intcount)
+    for n in x:
+        t=threading.Thread(target=f1,args=('t'+ str(n),))
+        #if n==1:
+        #    t.setDaemon(True)
+        t.name='t' + str(n)
+        threads.append(t)
+
+    for n in x:
+        threads[n].start()
+
+    #print(threading.activeCount())
+    for item in threading.enumerate():
+        print(item)
+
+    print('--------')
+
+    for item in threads:
+        print(item)
+
+    print(threads[0].isAlive())
+
+    for n in x:
+        threads[n].join()
+
+if __name__=='__main__':
+    lock=threading.Lock()
+    main()
+运行结果：
+<_MainThread(MainThread, started 1968)>
+<Thread(t0, started 2032)>
+<Thread(t1, started 6696)>
+<Thread(t2, started 3372)>
+--------
+<Thread(t0, started 2032)>
+<Thread(t1, started 6696)>
+<Thread(t2, started 3372)>
+True
+线程t0正在运行中....线程启动于：2018-08-18 22:40:35.886018
+线程t1正在运行中....线程启动于：2018-08-18 22:40:37.894978
+线程t2正在运行中....线程启动于：2018-08-18 22:40:38.905267
+从运行结果中，可以看出，锁对象是成功执行的，严格按照线程队列的预定队列顺序执行的，即：
+如果没有Lock锁对象，则由于sleep的关系，t2线程反而要先打印自己的执行信息，而t0线程将最后打印自己的执行信息。
+但由于使用了Lock锁对象，按照三个线程声明Lock.acquire的先后顺序形成了队列，则执行结果证明严格执行了t0-t1-t2的执行顺序。
+但程序执行造成了程序死锁，我使用的VSCODE编辑工具都崩溃了。
+后来才意识到，因为三个线程使用了同一个锁，即是说：
+当t0使用了lock.acquire()之后，还没有等到t0使用lock.release()，紧急着启动的线程t1又开始调用lock.acquire()命令——
+这时由于同一个Lock锁是不能连续两次及以上使用：acquire()方法的，就必然造成了程序锁死。（在我的测试过程中的屏幕录像中可以看到，好像还没有理解到被锁死，怀疑是VSCODE编程器出问题了。）
+测试代码三及事后反复研究推论结果
+于是第三个测试是，使用三个锁对象来对应三个线程，每个线程都使用一个独立的锁对象。
+import threading
+from datetime import datetime
+from time import sleep
+
+intcount=3
+
+def f1(n):
+    if n=='t0':
+        lock1.acquire()
+        sleep(3)
+    elif n=='t1':
+        lock2.acquire()
+        sleep(2)
+    elif n=='t2':
+        lock3.acquire()
+        sleep(1)
+    else:
+        pass
+
+    strtime=str(datetime.now())
+    print('线程' + n + '正在运行中....线程启动于：' + strtime)
+    if n=='t0':
+        lock1.release()
+    elif n=='t1':
+        lock2.release()
+    elif n=='t2':
+        lock3.release()
+    else:
+        pass
+def main():
+    threads=[]
+    x=range(intcount)
+    for n in x:
+        t=threading.Thread(target=f1,args=('t'+ str(n),))
+        #if n==1:
+        #    t.setDaemon(True)
+        t.name='t' + str(n)
+        threads.append(t)
+
+    for n in x:
+        threads[n].start()
+
+    #print(threading.activeCount())
+    for item in threading.enumerate():
+        print(item)
+
+    print('--------')
+
+    for item in threads:
+        print(item)
+
+    print(threads[0].isAlive())
+
+    for n in x:
+        threads[n].join()
+
+if __name__=='__main__':
+    lock1=threading.Lock()
+    lock2=threading.Lock()
+    lock3=threading.Lock()
+    main()
+运行结果：
+<_MainThread(MainThread, started 9864)>
+<Thread(t0, started 6828)>
+<Thread(t1, started 10052)>
+<Thread(t2, started 1480)>
+--------
+<Thread(t0, started 6828)>
+<Thread(t1, started 10052)>
+<Thread(t2, started 1480)>
+True
+线程t2正在运行中....线程启动于：2018-08-18 22:54:49.059729
+线程t1正在运行中....线程启动于：2018-08-18 22:54:50.070877
+线程t0正在运行中....线程启动于：2018-08-18 22:54:51.069221
+从这一次的运行结果中可以看出，这一次的运行结果却和没有使用锁对象没有什么区别，证明三个锁对象独立运用没有发挥作用。
+而且在测试当时认为程序没有被 锁死，但事后证明，尽管如此使用了三个锁对象分别 独立对应三个线程，但同时使用，事后多次测试证明整个程序运行还是被锁死了，鉴于作为初学者我目前没有理解本次执行也被锁死的原因，需要高手解答为谢。
+
+测试代码四及事后反复研究推论结果
+这一次尝试进行分别读文件和写文件两个线程的防止冲突测试
+import threading
+from datetime import datetime
+from time import sleep
+
+strf='1.txt'
+
+def read():
+    n=3
+    while n:
+        #sleep(2)
+        with open(strf,'r',encoding='utf-8') as f:
+            strtime=str(datetime.now())
+
+            lstA=f.readlines()
+            print('读取',strtime,lstA,'\n\n')
+
+        n-=1   
+
+def write():
+    n=3
+    lock.acquire()
+    while n:
+        #sleep(1)
+        with open(strf,'w',encoding='utf-8') as f:
+            strtime=str(datetime.now())
+            lstA=['写入时间：',strtime]
+            print(lstA,'\n\n')
+            f.writelines(lstA)
+        n-=1
+    lock.release
+
+def main():
+    tread=threading.Thread(target=read)
+    twrite=threading.Thread(target=write)
+
+    twrite.start()
+    tread.start()
+    twrite.join()
+    tread.join()
+
+    print('主线程结束。')
+
+if __name__=='__main__':
+    lock=threading.Lock()
+
+    main()
+以上代码在VSCODE下的运行结果：
+['写入时间：', '2018-08-18 15:18:11.954452']
+读取2018-08-19 15:18:11.955450[]
+['写入时间：', '2018-08-18 15:18:11.956446']
+读取 2018-08-18 15:18:11.957445 ['写入时间：', '2018-08-19 15:18:11.958444']
+[]
+读取 2018-08-18 15:18:11.959515 ['写入时间：2018-08-19 15:18:11.958444']
+主线程结束。
+
+此测试代码历经一个多小时的修改，目前看到的已经是修正过多次后的最终比较流畅的版本了，但从结果看出，其实两个线程（读）和（写）实现了并行运行，预想中的效果时，当文件在处于写的状态时，是不允许读的线程去执行的，但从结果看到，存在写入失败和读取失败的状况，意味着线程的操作还是冲突了。
+将以上代码进行修改，加上了sleep语句。
+import threading
+from datetime import datetime
+from time import sleep
+
+strf='1.txt'
+
+def read():
+    n=3
+    while n:
+        sleep(2)
+        with open(strf,'r',encoding='utf-8') as f:
+            strtime=str(datetime.now())
+
+            lstA=f.readlines()
+            print('读取',strtime,lstA,'\n\n')
+
+        n-=1   
+
+def write():
+    n=3
+    lock.acquire()
+    while n:
+        sleep(1)
+        with open(strf,'w',encoding='utf-8') as f:
+            strtime=str(datetime.now())
+            lstA=['写入时间：',strtime]
+            print(lstA,'\n\n')
+            f.writelines(lstA)
+        n-=1
+    lock.release
+
+def main():
+    tread=threading.Thread(target=read)
+    twrite=threading.Thread(target=write)
+
+    twrite.start()
+    tread.start()
+    twrite.join()
+    tread.join()
+
+    print('主线程结束。')
+
+if __name__=='__main__':
+    lock=threading.Lock()
+
+    main()
+
+运行结果：
+['写入时间：', '2018-08-18 15:28:27.335136']
+读取 2018-08-19 15:28:28.331552 ['写入时间：2018-08-18 15:28:27.335136']
+ ['写入时间：', '2018-08-18 15:28:28.341305']
+ ['写入时间：', '2018-08-18 15:28:29.342920']
+读取 2018-08-18 15:28:30.350506 ['写入时间：2018-08-18 15:28:29.342920']
+读取 2018-08-18 15:28:32.359019 ['写入时间：2018-08-18 15:28:29.342920']
+主线程结束。
+在加上sleep语句后，程序 执行基本符合要求了，但仍然的，程序被锁死，在显示【主线程结束】的情况下，发现程序仍然处于锁死状态。目前无解，自己当局者迷中，亟待同学者特别是高手点拨。
+下一研究的是RLock对象，不知能否解决Lock锁不管怎样都在VSCODE编辑器中锁死的这些问题。
+
+总体感觉，今天是完全凌乱了，亟需高手回复指导，万分感激！！！
+
+就是要学  社群  www.941xue.com/index.aspx 
+ 原文地址：http://www.941xue.com/content.aspx?id=1346     
+本笔记在B站上的视频地址：      https://www.bilibili.com/video/BV1Zt411v7dd/  
+Github:
+https://github.com/lhghroom/ZeroBasicSelfStudyPython 
+
+【欢迎大家加入[就是要学]社群】
+如今，这个世界的变化与科技的发展就像一个机器猛兽，它跑得越来越快，跑得越来越快，在我们身后追赶着我们。
+很多人很早就放弃了成长，也就放弃了继续奔跑，多数人保持终身不变的样子，原地不动，成为那猛兽的肚中餐——当然那也不错，在猛兽的逼迫下，机械的重复着自我感觉还良好地稳定工作与生活——而且多半感觉不到这有什么不正常的地方，因为在猛兽肚子里的是大多数人，就好像大多数人都在一个大坑里，也就感觉不出来这是一个大坑了，反而坑外的世界显得有些不大正常。
+为什么我们不要做坑里的大多数人？
+因为真正的人生，应当有百万种可能 ；因为真正的一生可以有好多辈子组成，每一辈子都可以做自己喜欢的事情；因为真正的人生，应当有无数种可以选择的权利，而不是总觉得自己别无选择。因为我们要成为一九法则中为数不多的那个一；因为我们要成为自己人生的导演而不是被迫成为别人安排的戏目中的演员。
+【请注意】
+就是要学社群并不会告诉你怎样一夜暴富！也不会告诉你怎样不经努力就实现梦想！
+【请注意】
+就是要学社群并没有任何可以应付未来一切变化的独门绝技，也没有值得吹嘘的所谓价值连城的成功学方法论！
+【请注意】
+社群只会互相帮助，让每个人都看清自己在哪儿，自己是怎样的，重新看见心中的梦想，唤醒各自内心中的那个英雄，然后勇往直前，成为自己想要成为的样子！
+期待与你并肩奔赴未来！
+www.941xue.com 
+QQ群：646854445 （【就是要学】终身成长）
+ 
+
+
+
+我的学习过程录像百度盘地址分享如下：（清晰度：1280x720）
+链接：https://pan.baidu.com/s/1C-uN7Igs7VDHQuFy-pZWRw  
+提取码：sf37
+
+Bilibili:
+https://www.bilibili.com/video/av38089609/ 
+
+喜马拉雅语音笔记：
+https://www.ximalaya.com/keji/19103006/145172481 
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+

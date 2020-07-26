@@ -1,0 +1,167 @@
+孤荷凌寒自学python第四十天python 的线程锁RLock
+
+（完整学习过程屏幕记录视频地址在文末，手写笔记在文末）
+因为研究同时在多线程中读写同一个文本文件引发冲突，所以使用Lock锁尝试同步，但居然没有完全成功，于是今天进一步研究RLock锁。
+得到RLock锁对象
+新的RLock锁对象=threading.RLock()
+使用RLock类的初始化方法之前，必须保证当前py文档已声明引用过threading模块：
+import threading
+
+RLock对象的主要方法
+RLock对象有两个主要的方法：
+1
+RLock锁对象 . acquire()
+当在指定线程的代码块中执行了锁对象的acquire()方法，那么，此线程将让并行的其它线程处于暂停执行的等待状态中，此线程将独占运行。
+
+2
+RLock锁对象 . release()
+当正在独占运行的线程执行了锁对象的release()方法的时候，就是解除了锁定操作，其它并行线程就可以继续运行了。
+
+RLock锁与Lock锁对象的区别
+Lock锁在任何情况下，虽然可以在不同的线程间使用acquire-release对，但只能acquire一次之后就等待release，而不能多次使用acquire。
+而RLock锁解决了这一问题，当已经acquire之后，还可以再一次，再几次acquire，只要后面同样次数的release几次即可。称为可重入锁或递归锁。但封闭acquire-release对只能在同一线程中完成。
+import threading
+from datetime import datetime
+from time import sleep
+
+def do():
+    strtime=str(datetime.now())
+    ret=lock.acquire()
+    print(ret)
+    ret=lock.acquire()
+    print(ret)
+    print(strtime)
+    ret=lock.release()
+    print(ret)
+    ret=lock.release()
+    print(ret)
+
+lock=threading.RLock()
+t1=threading.Thread(target=do)
+t1.start()
+t1.join()
+运行结果：
+True
+True
+2018-08-23 20:29:34.426639
+None
+None
+
+完善Lock测试代码由RLock代替
+修改后的代码如下：
+import threading
+from datetime import datetime
+from time import sleep
+
+strf='1.txt'
+
+def read():
+    n=3
+    while n:
+            sleep(2)
+        #print(lock.acquire(False))
+        #if lock.acquire(False):
+            lock2.acquire()
+            print(lock.acquire(True))
+            if not lock.acquire(True): #如果其它线程没有处于锁定执行状态
+                with open(strf,'r',encoding='utf-8') as f:
+                    strtime=str(datetime.now())
+
+                    lstA=f.readlines()
+                    print('读取',strtime,lstA,'\n\n')
+            lock2.release()
+       
+            n-=1
+        
+def write():
+    n=3
+    
+    while n:
+        sleep(1)
+        lock.acquire()
+        #lock.acquire()
+        print('锁的状态：',lock.acquire(True))
+        if not lock2.acquire(True):
+            with open(strf,'w',encoding='utf-8') as f:
+                strtime=str(datetime.now())
+                lstA=['写入时间：',strtime]
+                print(lstA,'\n\n')
+                f.writelines(lstA)
+        
+        lock.release
+        n-=1
+        #lock.release
+    print('后来锁的状态：',lock.acquire(True))
+    if lock.acquire(True):
+        lock.release()
+    print('再后来锁的状态：',lock.acquire(True))
+    
+def main():
+    tread=threading.Thread(target=read)
+    twrite=threading.Thread(target=write)
+
+    twrite.start()
+    tread.start()
+    twrite.join()
+    tread.join()
+
+    print('主线程结束。')
+
+if __name__=='__main__':
+    lock=threading.RLock()
+    lock2=threading.RLock()
+    main()
+经过测试，发现也无法解决读写冲突的问题，而且仍然程序被锁死。
+一些小的修改后，读写操作可以交替进行，然而，始终存在读写线程同时操作指定文件的情况，详细欢迎看操作过程录屏，万分感谢能有高人给予指导。
+一旦两个线程同步操作指定的同一个文件，就会出现读或写失败。
+且不论“主线程结束”是否已经打印，会发现程序都已被 锁死了。	Visual Studio Code基本上都会出现程序崩溃现象。
+当然，不管 Lock锁还是RLock锁，如果不涉及磁盘文件操作，仅仅是对变量对象操作的话，一切又非常正常，所有线程同步工作都能完美完成。
+接下来将研究下另一个功用更丰富的线程操作对象Event，看情况对于文件操作的同步来说又会如何 。
+
+就是要学  社群  www.941xue.com/index.aspx 
+ 原文地址：http://www.941xue.com/content.aspx?id=1355   
+本笔记在B站上的视频地址：      https://www.bilibili.com/video/BV1Zt411v7xj/   
+Github:
+https://github.com/lhghroom/ZeroBasicSelfStudyPython 
+
+【欢迎大家加入[就是要学]社群】
+如今，这个世界的变化与科技的发展就像一个机器猛兽，它跑得越来越快，跑得越来越快，在我们身后追赶着我们。
+很多人很早就放弃了成长，也就放弃了继续奔跑，多数人保持终身不变的样子，原地不动，成为那猛兽的肚中餐——当然那也不错，在猛兽的逼迫下，机械的重复着自我感觉还良好地稳定工作与生活——而且多半感觉不到这有什么不正常的地方，因为在猛兽肚子里的是大多数人，就好像大多数人都在一个大坑里，也就感觉不出来这是一个大坑了，反而坑外的世界显得有些不大正常。
+为什么我们不要做坑里的大多数人？
+因为真正的人生，应当有百万种可能 ；因为真正的一生可以有好多辈子组成，每一辈子都可以做自己喜欢的事情；因为真正的人生，应当有无数种可以选择的权利，而不是总觉得自己别无选择。因为我们要成为一九法则中为数不多的那个一；因为我们要成为自己人生的导演而不是被迫成为别人安排的戏目中的演员。
+【请注意】
+就是要学社群并不会告诉你怎样一夜暴富！也不会告诉你怎样不经努力就实现梦想！
+【请注意】
+就是要学社群并没有任何可以应付未来一切变化的独门绝技，也没有值得吹嘘的所谓价值连城的成功学方法论！
+【请注意】
+社群只会互相帮助，让每个人都看清自己在哪儿，自己是怎样的，重新看见心中的梦想，唤醒各自内心中的那个英雄，然后勇往直前，成为自己想要成为的样子！
+期待与你并肩奔赴未来！
+www.941xue.com 
+QQ群：646854445 （【就是要学】终身成长）
+ 
+
+我的学习过程录像百度盘地址分享如下：（清晰度：1280x720）
+链接：https://pan.baidu.com/s/1rCS0anwyai2zil1icngGCQ  
+提取码：goqj
+
+Bilibili:
+https://www.bilibili.com/video/av38089793/ 
+
+喜马拉雅语音笔记：
+https://www.ximalaya.com/keji/19103006/145423605 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

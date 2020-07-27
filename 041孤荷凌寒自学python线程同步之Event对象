@@ -1,0 +1,227 @@
+孤荷凌寒自学python第四十一天python 的线程同步之Event对象
+
+（完整学习过程屏幕记录视频地址在文末，手写笔记在文末）
+鉴于Lock锁与RLock锁均宣告没有完全完成同步文件操作的问题，于是进一步初步了解了Event对象。
+得到Event对象
+新的Event对象=threading. Event ()
+使用Event类的初始化方法之前，必须保证当前py文档已声明引用过threading模块：
+import threading
+
+Event对象的主要方法
+Event对象有三个主要的方法：(具体用法在下文再详细笔记)
+1
+Event对象 . set()
+
+2
+Event对象 . wait()
+
+3
+Event对象 . clear()
+
+Event对象的标识（flag）状态
+1
+flag=False 这 Event对象的默认状态，此时线程的执行不受影响。
+2
+flag=True 这是Event对象执行了set()方法后的状态，这种状态表示，如果线程当前于于wait(等待)状态中，现在就可以恢复运行了。
+3
+wait状态
+如果 在线程中执行了Event对象的wait()方法，那么此线程就处于wait状态，等待flag=True状态的出现后，才能继续运行。
+
+恢复Event对象的状态为默认状态的方法
+执行：
+Event对象.clear()
+方法就会将Event对象的状态恢复为默认状态。
+
+获取Event对象的当前状态标识（flag）
+状态flag=Event对象.is_set()
+状态flag=Event对象.isSet()
+这两个方法效果等同，都将返回一个布尔对象。
+以上方法无法得知某个线程是否处在等待状态中，因为，一个Event对象可以同时出现在多个线程中，因此想知道哪些个线程处于等待状态中，对于Event对象来说是不明确的。目前我对Event对象的学习不够深入，也没有了解可以完成此检验的其它方法。
+
+将文件由两个线程反复同步写和读的实现由Event对象来实现
+最开始是在读线程和写线程中分别 使用独立的Event对象来进行运作，代码如下：
+import threading
+from datetime import datetime
+from time import sleep
+
+strf='1.txt'
+
+def read():
+    n=3
+    while n:
+    
+            
+            if Ewrite.isSet()==True: #如果其它线程没有处于锁定执行状态
+                Eread.wait()
+
+            with open(strf,'r',encoding='utf-8') as f:
+                lstA=f.readlines()
+                print('读取第' + str(n) + '次' + str(lstA) + str(Ewrite.isSet()) + '\n')
+            Ewrite.set()
+            #Eread.clear()
+       
+            n-=1
+        
+def write():
+    n=3
+    
+    while n:
+
+        if Eread.isSet()==True:
+            Ewrite.wait()
+        with open(strf,'w',encoding='utf-8') as f:
+            
+            lstA=['写入','第' + str(n) + '次' + str(Eread.isSet()) + '\n']
+            print(lstA)
+            f.writelines(lstA)
+        Eread.set()
+        #Ewrite.clear()
+        n-=1
+        
+
+    
+def main():
+    tread=threading.Thread(target=read)
+    twrite=threading.Thread(target=write)
+
+    twrite.start()
+    tread.start()
+    #Eread.set()
+    twrite.join()
+    tread.join()
+
+    print('主线程结束。')
+
+if __name__=='__main__':
+    Eread=threading.Event()
+    Ewrite=threading.Event()
+    main()
+运行结果如下，证实没有成功：
+['写入', '第3次False\n']
+读取第3次[]False
+ ['写入', '第2次True\n']
+读取第2次[]True
+ ['写入', '第1次True\n']
+读取第1次[]True
+从结果中看出，三次写入是成功的，且读写交替进行，符合同步要求，但证实在同步读写同一个文件时，还是出现了冲突，因为读的三次，一次都没有取出内容来。
+于是修改代码为在两个线程中都使用同一个Event对象来控制：
+下面是代码，特别注意注释部分。
+import threading
+from datetime import datetime
+from time import sleep
+
+strf='1.txt'
+
+def read():
+    n=3
+    while n:
+    
+            
+            if E.isSet()==True: #如果Event对象已经执行过set方法了，那么，read可以利用此间隙运行，因为write已经运行结束，没有占用要读的文件
+                pass
+            else:
+                E.wait()
+
+            
+            #E.clear()
+            with open(strf,'r',encoding='utf-8') as f:
+                lstA=f.readlines()
+            #读文件的时候，尽快将文件中的内容读取出来 ，就马上离开with语句块，使操作的文件尽快关闭。
+            # 意思就是说，不要在操作文件的with语句块中放太多语句，全要操作的文件处于独占打开模式，这会影响其它进程对同一文件的操作。 
+            sleep(1)
+            print('读取第' + str(n) + '次' + str(lstA) + str(E.isSet()) + '\n')
+            E.set()
+            
+            n-=1
+        
+def write():
+    n=3
+    
+    while n:
+        
+        if E.isSet()==True: #如果Event对象已经执行过set方法了，那么，write可以利用此间隙运行，因为read已经运行结束，没有占用要读的文件
+            pass
+        else:
+            E.wait()
+        
+        
+        #E.clear()
+        with open(strf,'w',encoding='utf-8') as f:
+            lstA=['写入','第' + str(n) + '次' + str(E.isSet())]
+            f.writelines(lstA)
+        sleep(1)
+        print(str(lstA) + '\n')  
+        E.set()
+        n-=1
+        
+
+    
+def main():
+    tread=threading.Thread(target=read)
+    twrite=threading.Thread(target=write)
+
+    tread.start()
+    twrite.start()
+    
+    
+    
+    E.set()
+    twrite.join()
+    tread.join()
+
+    print('主线程结束。')
+
+if __name__=='__main__':
+    E=threading.Event()
+
+    main()
+
+
+运行结果如下：
+['写入', '第3次True']
+读取第3次['写入第3次True']True
+
+
+['写入', '第2次True']
+读取第2次['写入第2次True']True
+
+
+['写入', '第1次True']
+读取第1次['写入第1次True']True
+从执行结果中看出，终于实现了预定的测试目标：读写交替进行，读和写都能正确完成，说明文件在同一时间只有一个线程在操作使用，没有发生冲突。
+
+就是要学  社群  www.941xue.com/index.aspx 
+ 原文地址：http://www.941xue.com/content.aspx?id=1359  
+本笔记在B站上的视频地址：      https://www.bilibili.com/video/BV1Zt411v7eQ/  
+Github:
+https://github.com/lhghroom/ZeroBasicSelfStudyPython 
+
+【欢迎大家加入[就是要学]社群】
+如今，这个世界的变化与科技的发展就像一个机器猛兽，它跑得越来越快，跑得越来越快，在我们身后追赶着我们。
+很多人很早就放弃了成长，也就放弃了继续奔跑，多数人保持终身不变的样子，原地不动，成为那猛兽的肚中餐——当然那也不错，在猛兽的逼迫下，机械的重复着自我感觉还良好地稳定工作与生活——而且多半感觉不到这有什么不正常的地方，因为在猛兽肚子里的是大多数人，就好像大多数人都在一个大坑里，也就感觉不出来这是一个大坑了，反而坑外的世界显得有些不大正常。
+为什么我们不要做坑里的大多数人？
+因为真正的人生，应当有百万种可能 ；因为真正的一生可以有好多辈子组成，每一辈子都可以做自己喜欢的事情；因为真正的人生，应当有无数种可以选择的权利，而不是总觉得自己别无选择。因为我们要成为一九法则中为数不多的那个一；因为我们要成为自己人生的导演而不是被迫成为别人安排的戏目中的演员。
+【请注意】
+就是要学社群并不会告诉你怎样一夜暴富！也不会告诉你怎样不经努力就实现梦想！
+【请注意】
+就是要学社群并没有任何可以应付未来一切变化的独门绝技，也没有值得吹嘘的所谓价值连城的成功学方法论！
+【请注意】
+社群只会互相帮助，让每个人都看清自己在哪儿，自己是怎样的，重新看见心中的梦想，唤醒各自内心中的那个英雄，然后勇往直前，成为自己想要成为的样子！
+期待与你并肩奔赴未来！
+www.941xue.com 
+QQ群：646854445 （【就是要学】终身成长）
+ 
+
+
+我的学习过程录像百度盘地址分享如下：（清晰度：1280x720）
+链接：https://pan.baidu.com/s/1Wi8XgCMMdttN6bX4SAngHQ  
+提取码：77e4
+
+Bilibili:
+https://www.bilibili.com/video/av38090327/ 
+
+喜马拉雅语音笔记：
+https://www.ximalaya.com/keji/19103006/145700746 
+
+
+

@@ -1,0 +1,379 @@
+孤荷凌寒自学python第四十四天Python操作 数据库之准备工作
+
+（完整学习过程屏幕记录视频地址在文末，手写笔记在文末）
+今天非常激动地开始接触Python的数据库操作的学习了，数据库是系统化设计中非常重要的部分，有了数据库才能保证所有的信息得以存储与交换。
+今天了解到python可以操作的数据库非常丰富，从关系型数据库到非关系型数据库都提供了良好的支持。
+就关系型数据库来说，从今天的初步学习中已经发现Python 可以非常方便的操作ACCESS本地数据库，SQLite本地数据库，msSQL数据服务，mySQL数据服务等。
+
+当然要要想让Python顺利的操作数据库，必须得给Python所在的不同的操作系统安装相应的补充库和组件才行。
+Windows系统（windows10）下需要安装的相关组件与库
+1
+pymysql
+这个组件是用来操作mySQL数据服务的，安装方法非常简单在windows的cmd命令行窗口中输入：
+pip install pymysql
+即可完成安装。
+2
+pypyodbc
+这个组件是旧的用于操作所有数据库的中间组件，通过ODBC连接字符串来操作所有的数据库。安装方法 也很简单，在windows的cmd命令行窗口中输入：
+pip install pypyodbc
+即可完成安装。
+3
+pymssql
+这个组件是用来操作msSQL数据服务的，尝试使用Pip命令行安装可能会失败，于是采用了下载安装的方法 ：
+到下面的地址中去找到对应自己Python版本与windows10系统版本32位或64位相区别的对应pymssql插件：
+https://www.lfd.uci.edu/~gohlke/pythonlibs/#pymssql
+找到符合当前操作系统的whl文件。
+我安装的操作系统是windows10 64位，Python版本是：3.6.5版，那么我找到的对应的whl文件就是：
+pymssql‑2.1.4.dev5‑cp36‑cp36m‑win_amd64.whl
+这个文件名中的【win_amd64】表示对应windows的64位操作系统；
+这个文件名中的【cp36】表示对应于Python版本号为3.6.X;
+将下载后的whl文件复制到Python安装目录的scripts文件夹下
+怎么知道自己的python安装在哪儿的呢？在windows下cmd命令行中输入 ：
+where python
+然后会得到 我的安装路径：
+G:\w10_1\python\python365\python.exe
+将这个whl文件复制到
+G:\w10_1\python\python365\scripts\
+文件夹下
+然后打开windows的cmd命令行窗口，输入：
+cd Python安装目录的scripts文件夹
+再输入
+pip install pymssql-xxxxx-xxx-xxx-xxx.whl
+即可完成安装
+我的输入如下：
+C:\Users\pw>G:
+
+G:\>cd G:\w10_1\python\python365\scripts\
+
+G:\w10_1\python\python365\Scripts>pip install pymssql‑2.1.4.dev5‑cp36‑cp36m‑win_amd64.whl
+4
+sqlite3
+sqlite是一个本地轻型数据库，安装好sqlite后，python中就已经有组件
+sqlite3了。
+到http://www.sqlite.org/下载sqlite3的压缩包：
+根据windows版本的32位和64位的不同下载对应版本的压缩包，
+我的windows10是64位版的，所以我下载的是：
+sqlite-dll-win64-x64-3240000.zip
+和
+sqlite-tools-win32-x86-3240000.zip
+将下载的两个压缩包解压
+其中一个包中有两个文件：
+sqlite3.def 和 sqlite3.dll
+另一个包中有：
+sqlite3.exe
+一共三个文件。
+在C盘新建一个文件夹，如：
+C:\sqlite3\
+然后将上面解压得到的三个文件本身复制到此文件夹中即可。
+然后将文件夹【C:\sqlite3\】添加到windows的系统环境变量的Path目录中。
+然后在cmd命令窗口中验证是否安装成功，输入：
+sqlite3
+如果出现版本信息等，说明安装已经成功，如我的测试结果：
+G:\w10_1\python\python365\Scripts>sqlite3
+SQLite version 3.24.0 2018-06-04 19:24:41
+Enter ".help" for usage hints.
+Connected to a transient in-memory database.
+Use ".open FILENAME" to reopen on a persistent database.
+sqlite>
+当然现在的sqlite还只能通过命令行操作，非常麻烦，于是可以安装一个可视化程序。
+我安装了的是：
+http://sqliteadmin.orbmu2k.de/
+中下载的：
+SQLite Administrator
+但结果发现并不如网上介绍的那么好用。
+
+Linux系统（Fedora28）下需要安装的相关组件与库
+然后我又在我的Fedora28系统下安装了同样的相关组件与库
+1
+pymysql
+直接在Fedora的命令行终端中输入：
+pip3 install pymysql
+即可完成安装
+2
+pypyodbc
+直接在Fedora的命令行终端中输入：
+pip3 install pypyodbc
+即可完成安装
+3
+pymssql
+这个直接尝试使用pip进行安装失败了，于是先进行了很多组件的安装，整个安装过程的命令如下：
+yum install python-devel python-setuptools
+
+yum install freetds-devel
+
+yum install python3-devel
+
+yum install -y libffi-devel openssl-devel
+
+pip3 install cython
+
+pip3 install git+https://github.com/pymssql/pymssql.git
+
+pip3 install pymssql
+
+pip install pymssql
+
+到这时安装才终于完成，然而，当我打开ECLIPSE进行python测试的时候，却得到提示：pymssql没有安装。
+这让人非常无所适从，因为在Fedora的终端中输入
+pip list
+进行检索时，列出安装的全部组件和库列表中，pymssql是存在的。
+在反复尝试，绞尽脑汁与Fedora系统奋战了2个小时之后，发现了问题的根源——eclipse本身的设置有问题！有些问题就是这样，不得不让人感慨造化弄人！
+现在找到了eclipse的设置方法如下 ：
+点击eclipse的windows菜单，点击它
+在弹出的下拉子菜单中，点击“preferances”菜单项。
+这时在出现的设置界面中在左边列表中点击“PyDev”项目
+找到子项目列表中的“Interpreters”子项目，点击它
+再点击子子项目列表中的“Python Interpreters”项目
+此时设置界面的右边出现了很多选项卡，找到其中的Libraries选项卡，点击之。
+此时检查列出的所有已添加在eclipse中的Python库位置引用列表
+通过界面最右边的按钮【add new】将所有可能的Python库位置都添加其中
+以我的Fedora系统为例，保证有以下列表项：
+
+/usr/lib64/python3.6
+/usr/lib64/python3.6/lib-dynload
+/usr/lib64/python3.6/site-packages
+/usr/lib/python3.6/site-packages
+/usr/local/lib64/python3.6/site-packages
+/usr/local/lib/python3.6/site-packages
+
+通过此方法就完全完成了pymssql的安装。
+
+4
+sqlite3
+在Fedora中安装sqlite3非常简单，执行以下两个操作，即可完成安装并得到了一个可视化界面操作程序。
+sudo yum install sqlite
+sudo yum install sqlitebrowser
+而且个人觉得Fedora系统下的这个可视化sqlite3操作程序非常好用。
+
+验证各个组件是否能够正确工作
+pypyodbc模块
+此模块已经不被推荐使用，虽然它可以全面的连接任意数据库，但实际上是要操作系统支持才行的。比如我在Fedora系统中，尝试使用ODBC字符串连接网络MSSQL服务器就遭遇失败，因为还没有在Fedora系统中配置好微软的ODBC和mssql的驱动。同样的在Fedora中尝试使用ODBC字符串连接ACCESS数据库也是失败。
+pypyodbc通过不同的连接字符串来连接不同的数据库，统一格式如下：
+数据库连接对象con=pypyodbc.connect(odbc连接字符串)
+其中ODBC连接字符串针对不同的数据库如下（我已学习到的有两种）
+ACCESS数据库
+Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=数据库文件完整路径文件名;Pwd=加密文件的密码
+特别注意，数据库文件的完整路径文件名的总字符数不要超过255个字符，否则就会造成溢出错误，无法读取这个MDB或ACCDB文件了。
+MSSQL数据库
+DRIVER={SQL Server};SERVER=MSSQL服务器地址;DATABASE=数据库名称;UID=用户名;PWD=用户密码
+首先测试了一下ACCESS数据库
+先是没有密码来加密保护的ACCESS数据库
+
+import pypyodbc
+
+accdb1 =r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=I:\MAKEAPP\python\Python365\边学习边测试文件夹\自学PYTHON部分\0044第四十四天连接网络数据库\_\Database2.accdb'
+
+conn = pypyodbc.connect(accdb1)
+
+cur = conn.cursor()
+
+cur.execute("SELECT * FROM m;") # 一段可执行的SQL语句
+
+list0 = cur.fetchall()
+
+print(list(list0))
+
+conn.close()
+这个测试有时可以成功读取中表的内容，但有时又会出现以下错误(极不稳定):
+pypyodbc.Error: ('HY000', '[HY000] [Microsoft][ODBC Microsoft Access Driver]常见错误 无法打开注册表项“Temporary (volatile) Ace DSN for process 0x1d78 Thread 0x123c DB C 0x3ed800b8  
+至于操作Access数据库不稳定的原因，没有找到准确的解决方案。
+在Fedora系统中因为没有配置好ACCESS的驱动 ，是完全不成功的。
+下面测试了有密码保护的ACESS数据库的访问
+import pypyodbc
+
+accdb1 =r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=I:\MAKEAPP\python\Python365\边学习边测试文件夹\自学PYTHON部分\0044第四十四天连接网络数据库\_\Database1.accdb;Pwd=孤荷凌寒的密码'
+
+conn = pypyodbc.connect(accdb1)
+
+cur = conn.cursor()
+
+cur.execute("SELECT * FROM m;") # 一段可执行的SQL语句
+
+list0 = cur.fetchall()
+
+print(list(list0))
+正常运行的结果是:
+[(1, '张三', '女', '没有信息', 36), (2, '孤荷凌寒', '男', '没有', 28)]
+
+然后测试了一下mssql数据库
+import pypyodbc
+
+from time import sleep
+
+def db_connect():
+    # 打开数据库连接
+    #MSSQL数据库中的字段如果是文本请使用nchar和nvchar而不要使用vchar和text,否则就是乱码
+    db=pypyodbc.connect('DRIVER={SQL Server};SERVER=xxxxx.xxxxx.com;DATABASE=孤荷凌寒的MSSQL数据库;UID=孤荷凌寒;PWD=孤荷凌寒的密码')
+    # 使用cursor()方法创建一个游标对象cursor
+    cursor = db.cursor()
+
+    # 使用execute()方法执行SQL查询
+    cursor.execute("SELECT * FROM dbo.m;") #直接用表名 m 也可以的
+
+    # 使用 fetchone() 方法获取单条数据
+    data = cursor.fetchone()
+
+    
+
+    print ("第一条数据如下: " ,data[0],data[1],data[2],data[3])
+
+    # 关闭数据库连接
+    db.close()
+
+def main():
+
+    db_connect()
+
+if __name__ == "__main__":
+    main()
+运行结果：
+第一条数据如下:  孤荷凌寒 男 没有定稿 36
+在设计MSSQL时要注意：MSSQL数据库中的数据表的字段如果是文本请使用nchar和nvchar而不要使用vchar和text,否则就是乱码
+
+pymysql模块
+得到连接对象的方法：
+数据库连接对象con=pymysql.connect("mysql服务器地址", "sql服务器用户名", "用户登录密码", "数据库名")
+测试如下：
+import pymysql
+
+def db_connect():
+    # 打开数据库连接
+    db = pymysql.connect("localhost", "root", "abc123", "mysql")
+
+    # 使用cursor()方法创建一个游标对象cursor
+    cursor = db.cursor()
+
+    # 使用execute()方法执行SQL查询
+    cursor.execute("SELECT * FROM m;")
+
+    # 使用 fetchone() 方法获取单条数据
+    data = cursor.fetchall()
+
+    print (list(data))
+
+    # 关闭数据库连接
+    db.close()
+
+def main():
+
+    db_connect()
+
+if __name__ == "__main__":
+    main()
+运行结果如下：
+[(1, '张三', '女', '没有信息', 36), (2, '孤荷凌寒', '男', '没有', 35)]
+
+pymssql模块
+得到连接对象的方法：
+数据库连接对象con=pymssql.connect("mssql服务器地址", "sql服务器用户名", "用户登录密码", "数据库名"[,charset=’utf8’])
+可选参数
+charset=’utf8’
+注意
+utf8
+中间没有连接符 –
+当然实际上此可选参数没有起到多大的作用，对于mssql来说，还是得在设计时：对于文本类型的字段使用nchar和nvchar而不要使用vchar和text类型,否则照样是乱码。
+测试如下：
+import pymssql
+
+def db_connect():
+    # 打开数据库连接
+    #MSSQL数据库中的字段如果是文本请使用nchar和nvchar而不要使用vchar和text,否则就是乱码
+    db = pymssql.connect("xxxxx.xxx.com", "孤荷凌寒", "孤荷凌寒的mssql登录密码", "孤荷凌寒的mssql数据库名",charset='utf8')
+    # 使用cursor()方法创建一个游标对象cursor
+    cursor = db.cursor()
+
+    # 使用execute()方法执行SQL查询
+    cursor.execute("SELECT * FROM dbo.m;") #直接用表名 m 也可以的
+
+    # 使用 fetchone() 方法获取单条数据
+    data = cursor.fetchone()
+
+    print ("第一条记录是 : " ,data[0],data[1],data[2],data[3])
+
+    # 关闭数据库连接
+    db.close()
+
+def main():
+
+    db_connect()
+
+if __name__ == "__main__":
+    main()
+运行结果：
+第一条记录是:  孤荷凌寒 男 没有定稿 36
+使用pymssql模块在windows下和Fedora下均被测试通过。
+
+sqlite3模块
+得到连接对象的方法：
+数据库连接对象con=sqlite3.connect(r"sqlite数据库文件的完整路径和文件名")
+特别注意，sqlite数据库文件的完整路径文件名的总字符数不要超过255个字符，否则就会造成溢出错误，无法读取这个DB或S3DB文件了。
+与前面的所有连接对象不同，sqlite3的连接对象本身就有【execute()】方法。
+但一般情况下，仍然通过cursor游标对象来执行execute()方法。
+测试如下：
+    import sqlite3
+try:
+        con=sqlite3.connect(r'C:\ProgramData\SQLITE3\slone.s3db')
+        #con.execute('select * from student;') #和Pymssql和pymysql不同，sqlite3的con有execute()方法
+        cur=con.cursor()
+        cur.execute('select * from m;')
+        data=cur.fetchall()
+        print(list(data))
+        con.close()
+    except:
+        print('出错了')
+执行结果如下：
+[(1, '张三', '女', '没有信息', 36), (2, '孤荷凌寒', '男', '没有', 35)]
+在Fedora下也能测试成功，但指定的文件路径不同。
+
+
+小结今天学到的python数据库操作知识
+不管通过什么模块连接什么数据库，都是先得到一个【数据库连接对象】
+然后通过【数据库连接对象】得到【游标对象】，方法是：
+游标对象=数据库连接对象.cursor()
+游标即cursor,Python数据库的主要操作都在游标对象中。
+今天学到的游标对象的三个主要方法
+（1）
+游标对象.execute()
+执行sql语句，sql语句是关系数据库通用的数据库操作语句，有庞大的体系，我之前 学习过其它编程语言，对关系数据库操作的SQL语句已有全面了解，若是新学习的同学者建议专门购书学习SQL语句。
+（2）
+数据表对象=游标对象. fetchall ()
+从SQL语句返回的查询结果中得到所有数据库表记录的一个数据表对象（我的个人理解，对这个得到的数据对象目前没有深入学习），这个数据对象中包含了多条记录。
+（3）
+数据表对象=游标对象. fetchone ()
+只取回一条记录。
+数据库连接对象在使用完成后一定要关闭
+关闭（断开）与数据库连接的方法是:
+数据库连接对象.close()
+
+
+就是要学  社群  www.941xue.com/index.aspx 
+ 原文地址：http://www.941xue.com/content.aspx?id=1380 
+本笔记在B站上的视频地址：      https://www.bilibili.com/video/BV1Zt411v7uF/
+Github:
+https://github.com/lhghroom/ZeroBasicSelfStudyPython 
+
+【欢迎大家加入[就是要学]社群】
+如今，这个世界的变化与科技的发展就像一个机器猛兽，它跑得越来越快，跑得越来越快，在我们身后追赶着我们。
+很多人很早就放弃了成长，也就放弃了继续奔跑，多数人保持终身不变的样子，原地不动，成为那猛兽的肚中餐——当然那也不错，在猛兽的逼迫下，机械的重复着自我感觉还良好地稳定工作与生活——而且多半感觉不到这有什么不正常的地方，因为在猛兽肚子里的是大多数人，就好像大多数人都在一个大坑里，也就感觉不出来这是一个大坑了，反而坑外的世界显得有些不大正常。
+为什么我们不要做坑里的大多数人？
+因为真正的人生，应当有百万种可能 ；因为真正的一生可以有好多辈子组成，每一辈子都可以做自己喜欢的事情；因为真正的人生，应当有无数种可以选择的权利，而不是总觉得自己别无选择。因为我们要成为一九法则中为数不多的那个一；因为我们要成为自己人生的导演而不是被迫成为别人安排的戏目中的演员。
+【请注意】
+就是要学社群并不会告诉你怎样一夜暴富！也不会告诉你怎样不经努力就实现梦想！
+【请注意】
+就是要学社群并没有任何可以应付未来一切变化的独门绝技，也没有值得吹嘘的所谓价值连城的成功学方法论！
+【请注意】
+社群只会互相帮助，让每个人都看清自己在哪儿，自己是怎样的，重新看见心中的梦想，唤醒各自内心中的那个英雄，然后勇往直前，成为自己想要成为的样子！
+期待与你并肩奔赴未来！
+www.941xue.com 
+QQ群：646854445 （【就是要学】终身成长）
+ 
+
+我的学习过程录像百度盘地址分享如下：（清晰度：1280x720）
+链接：https://pan.baidu.com/s/1EJUbOEtFOlqIj0IgyznD7g  
+提取码：hyv0
+
+Bilibili:
+https://www.bilibili.com/video/av38091838/ 
+
+喜马拉雅语音笔记：
+https://www.ximalaya.com/keji/19103006/146513197 

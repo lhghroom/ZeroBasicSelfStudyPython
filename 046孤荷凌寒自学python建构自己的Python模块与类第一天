@@ -1,0 +1,1038 @@
+孤荷凌寒自学python第四十六天开始建构自己用起来更顺手一点的Python模块与类，尝试第一天
+
+（完整学习过程屏幕记录视频地址在文末，手写笔记在文末）
+按上一天的规划，这是根据过去我自学其它编程语言的经验，我觉得对Python的肤浅的基础的知识学习完成之后，一定也要开始的构建自己的Python编程大厦的脚手架——开始将一些自己用起来顺手的常用功能封装块化，建立模块和类，形成一种基础沉淀，这样整个自己的Python学习大厦才将越修越好，这是从我过往的编程语言自学中总结出来的，今天经过第一天的尝试，发现建构自己用起来顺手的一些模块还是非常有必要的。
+
+一、尝试将Python的所有提示可视化，成为像windows系统那样的对话框
+
+tkinter模块提供了这样的可视化对话框对象，但此对象中弹出不同的对话框，就要使用不同的方法，而且方法名称繁复，且参数不少（然而其中多数参数其实是基本用不上的）。
+之前我长时间使用过vb系的编程语言，深知vb系统的编程语言一句msgbox 就能搞定全部对话框的精妙与简单。
+于是，我尝试建立的第一个通用操作模块中的第一方法函数就是模仿出vb系编程语言的msgbox函数。
+下面就是我的第一个自定义模块，主要存放一些方便调用的通用的自建函数：
+文件命名为：_mty.py
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+import tkinter
+import tkinter.messagebox
+import os.path
+
+import chardet
+
+mtyErrString=''  #供其它模块读取的包含此模块中各函数中记录的错误信息的全局变量
+
+#print(dir(tkinter.messagebox)) #查看这个模块提供了哪些方法
+def msgboxGhlh(info,titletext='孤荷凌寒的对话框QQ578652607',style=0,isShowErrMsg=False):
+    '''
+    模仿vb的msgbox，参数顺序都基本一致
+    #style的值如下：
+    #0 只有一个ok按钮的提示框，有蓝背景圆圈，白色i号图标
+    #1 有ok按钮和cancel按钮，有问号图标（确定，取消）
+    #3 有显示yes、no、cancel按钮，有问号图标
+    #4 显示yes和no按钮，有问号图标显示是和否按钮。
+    #5 显示retry和cancel按钮，有黄色背景三角形，黑色感叹号，重试和取消按钮
+    #16 显示错误信息，有错误的图标
+    #48 显示警告信息，有黄色背景三角形，黑色感叹号
+    #50 显示包含一个【是】按钮和【否】按钮的对话框，有一个问号图标，但【是】返回字符串对象'yes',【否】返回字符串对象'no'
+    '''
+    global mtyErrString #只有这样才能在函数内使用外部的全局变量
+    mtyErrString='' #每个函数使用前先清空之前的错误信息，以存储本函数可能出现的错误信息
+    try:
+
+        if style==0: #只有一个ok按钮的提示框，显示一般信息,单独一个确定按钮返回字符串对象 'ok'
+            return tkinter.messagebox.showinfo(title =titletext, message = info)
+        elif style==1: #有ok(确定)按钮和cancel按钮,确定按钮和取消按钮放在一起，确定按钮返回布尔值True，取消按钮返回布尔值False
+            return tkinter.messagebox.askokcancel(title=titletext,message = info)
+        elif style==3: #有显示yes、no、cancel按钮,是/否/取消在一起时，取消返回的是None对象，类型为：NoneType
+            return tkinter.messagebox.askyesnocancel(title=titletext,message = info)
+        elif style==4: #显示yes和no按钮，也就是显示是和否按钮。yes返回True no返回False
+            return tkinter.messagebox.askyesno(title=titletext,message = info) 
+        elif style==5: #显示retry和cancel按钮，也就是重试和取消按钮,重试和取消按钮放在一起，重试返回布尔值True,取消返回布尔值False
+            return tkinter.messagebox.askretrycancel(title=titletext,message = info)
+        elif style==16: #显示错误信息,单独一个确定按钮返回字符串对象 'ok'
+            return tkinter.messagebox.showerror(title=titletext,message = info)
+        elif style==48: #显示警告信息,单独一个确定按钮返回字符串对象 'ok'
+            return tkinter.messagebox.showwarning(title=titletext,message = info)
+        elif style==50: #显示包含一个【是】按钮和【否】按钮的对话框，有一个问号图标，但【是】返回字符串对象'yes',【否】返回字符串对象'no'
+            return tkinter.messagebox.askquestion(title=titletext,message = info)
+        else :#只有一个ok按钮的提示框，显示一般信息,单独一个确定按钮返回字符串对象 'ok'
+            return tkinter.messagebox.showinfo(title =titletext, message = info)
+
+    except Exception as e:
+        mtyErrString='弹出对话框都出错了:' + str(e) + '\n此函数由【孤荷凌寒】创建,QQ578652607'
+        if isShowErrMsg==True:
+            return tkinter.messagebox.showerror(title=titletext,message = mtyErrString)
+        else:
+            return False
+    else:
+        pass
+    finally:
+        pass
+ 
+#--取文件的后缀名部分
+def getFilehzGhlh(strpath,isIncPoint=False,isShowMsg=False):
+    '''
+    获取一个文件（可以是完整路径，也可以是一个绝对文件名）的后缀名
+    isIncPoint如果是True，则会返回.xxx形式的后缀，如果为False，则会返回xxx形式的后缀
+    '''
+    global mtyErrString #只有这样才能在函数内使用外部的全局变量
+    mtyErrString='' #每个函数使用前先清空之前的错误信息，以存储本函数可能出现的错误信息
+    try:
+        strls=os.path.splitext(strpath)[1]
+        if isIncPoint==True:
+            return strls
+        else:
+            ar=strls.split('.')
+            return ar[1]
+    except Exception as e:
+        mtyErrString='获取指定文件的后缀名出错了:' + str(e) + '\n此函数由(孤荷凌寒】创建Q578652607'
+        if isShowMsg==True:
+            msgboxGhlh(mtyErrString,"出现错误",16 )
+        
+        return ''
+    else:
+        pass
+    finally:
+        pass
+
+今天我已经在此自定义模块中编写好了两个函数。
+其中第一个函数【msgboxGhlh】就是模仿vb系的msgbox方法的函数。通过调用tkinter模块的多个不同的弹出对话框方法来实现相似的功能。详细构建我在代码的注释中已经描述得非常清楚了。
+
+我已经将我的自建模块托管到github.com上，下面是地址：
+https://github.com/lhghroom/python3_mod_ty
+
+然后在上一天写好的使用tkinter来构建可视化窗体的文件中添加对此模块的引用，下面是改进后的上一天的Py文件的内容：
+import sys
+
+try:
+    from Tkinter import *
+except ImportError:
+    from tkinter import *
+
+try:
+    import ttk
+    py3 = False
+except ImportError:
+    import tkinter.ttk as ttk
+    py3 = True
+
+import _mty
+
+def msgbox(info,titletext='孤荷凌寒的对话框QQ578652607',style=0,isShowErrMsg=False):
+    '''
+    此函数是将来自于 自定义模块 _mty.py 中的
+    自建函数方法： msgboxGhlh 进行本地化处理，
+    简化的函数的调用，且名称与vb系的编程语言的对话框的调用名一样。
+    '''
+    return _mty.msgboxGhlh(info,titletext,style,isShowErrMsg)
+
+def vp_start_gui():
+    '''Starting point when module is the main routine.'''
+    global val, w, root
+    root = Tk()
+    top = __________ (root)
+    init(root, top)
+    root.mainloop()
+
+w = None
+def create___________(root, *args, **kwargs):
+    '''Starting point when module is imported by another program.'''
+    global w, w_win, rt
+    rt = root
+    w = Toplevel (root)
+    top = __________ (w)
+    init(w, top, *args, **kwargs)
+    return (w, top)
+
+def destroy___________():
+    global w
+    w.destroy()
+    w = None
+
+class __________:
+    def __init__(self, top=None):
+        '''This class configures and populates the toplevel window.
+           top is the toplevel containing window.'''
+        _bgcolor = '#d9d9d9'  # X11 color: 'gray85'
+        _fgcolor = '#000000'  # X11 color: 'black'
+        _compcolor = '#d9d9d9' # X11 color: 'gray85'
+        _ana1color = '#d9d9d9' # X11 color: 'gray85' 
+        _ana2color = '#d9d9d9' # X11 color: 'gray85' 
+        font9 = "-family {Microsoft YaHei UI} -size 16 -weight normal "  \
+            "-slant roman -underline 0 -overstrike 0"
+
+        top.geometry("1234x600+100+10")
+        top.title("孤荷凌寒的第一个测试用界面，联系qq：578652607，大家共同自学")
+        top.configure(background="#d9d9d9")
+
+
+        self.txtMain = Text(top)
+        self.txtMain.place(relx=0.1, rely=0.01, relheight=0.24, relwidth=0.81)
+        self.txtMain.configure(background="white")
+        self.txtMain.configure(font="TkTextFont")
+        self.txtMain.configure(foreground="black")
+        self.txtMain.configure(highlightbackground="#d9d9d9")
+        self.txtMain.configure(highlightcolor="black")
+        self.txtMain.configure(insertbackground="black")
+        self.txtMain.configure(selectbackground="#c4c4c4")
+        self.txtMain.configure(selectforeground="black")
+        self.txtMain.configure(width=1004)
+        self.txtMain.configure(wrap=WORD)
+
+        self.bntMain = Button(top,command=onBtnMainClick)
+        self.bntMain.place(relx=0.38, rely=0.4, height=106, width=343)
+        self.bntMain.configure(activebackground="#d9d9d9")
+        self.bntMain.configure(activeforeground="#000000")
+        self.bntMain.configure(background="#18cbd8")
+        self.bntMain.configure(disabledforeground="#a3a3a3")
+        self.bntMain.configure(font=font9)
+        self.bntMain.configure(foreground="#840da8")
+        self.bntMain.configure(highlightbackground="#d9d9d9")
+        self.bntMain.configure(highlightcolor="black")
+        self.bntMain.configure(pady="0")
+        self.bntMain.configure(text='''确定''')
+        self.bntMain.configure(width=343)
+        #self.bntMain.configure(command=onBtnMainClick)
+        
+        self.bntNew=Button(text='''弹出对话框''',width=20,command=onBtnNewClick,height=10)
+        self.bntNew.place(x=100,y=200)
+
+def init(top, gui, *args, **kwargs):
+    global w, top_level, root
+    w = gui
+    top_level = top
+    root = top
+
+def destroy_window():
+    # Function which closes the window.
+    global top_level
+    top_level.destroy()
+    top_level = None
+    
+def onBtnMainClick():
+    
+    w.txtMain.insert('1.0','hello\n')
+
+def onBtnNewClick():
+ 
+   isM=msgbox('你是否愿意？','让你一个人活到宇宙灭亡的一天',50)
+   msgbox(str(type(isM)))
+   #单独一个确定按钮返回字符串对象 'ok'
+   #确定按钮和取消按钮放在一起，确定按钮返回布尔值True，取消按钮返回布尔值False
+   #重试和取消按钮放在一起，重试返回布尔值True,取消返回布尔值False
+   #是/否/取消在一起时，取消返回的是None对象，类型为：NoneType
+   msgbox(str(isM))
+   #print(_m_ty.mtyErrString)
+
+if __name__ == '__main__':
+    
+    vp_start_gui()
+
+通过此文件，我尝试通过对参数的调整，成功调用了所有不同的对话框样式，
+首先在windows系统下获得完全成功。
+在linux系统下（我是在fedora28）系统下，一开始直接报些看不懂的英文的错误提示，一头雾水。折腾了一个小时，忽然歪打正着，因为上面代码的文件名我本来是命名为：
+ghlh_python_46th.py
+注意文件名中有“python”这个单词
+后来我尝试将文件名修改为：
+aaaa.py
+那种可怕的错误提示就没有了！！！
+这种莫名其妙的问题，从网络上从来没有人提到过，原来在linux系统下，至少是在fedora系统下，py文件的命名中连【python】这个单词都不要出现，真是邪乎，不知道是不是只有我一个人遇到了这种邪乎的情况。
+然后在Linux系统 （我是fedora28）系统下就测试通过了，与windows下的效果是一模一样的。
+此外同时发现如果py文件的命名中有中文名称或者文件名过长或文件所处的文件夹层次过多，同样会有错误发生，这可能是py在处理中文及对文件名路径总长度上容差的一个BUG.
+当然这也算是只有实践才能出真知的一个有力证明！！
+如果我不亲自去实验，不去花费那么多时间去自己尝试解决问题，将不会发现从来没有人提到过的错误。
+虽然说自学看上去是要走很多弯路，但若是不走这些弯路，肯定不会有深刻感受。这两者如何取舍各自仁者见仁，智者见智吧！
+
+二、继续深入学习Python的数据库操作，成功写出了第一个自定义操作所有数据库的通用数据库操作函数。
+
+在体会到自己成功建立第一个自定义模块，并完成了第一个通用函数的之后，我又一鼓作气，继续学习此段姐夫进入重点——数据库操作
+
+于是我又建立了新的一个专门用于自己方便操作数据库的模块文件：
+_mdb.py
+
+今天完成的_mdb.py的内容如下：
+
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+import pypyodbc
+import pymysql
+import pymssql
+import sqlite3
+import os.path
+
+import _mty
+
+mdbErrString='' #供其它模块使用的全局变量了，实时保存了各函数执行时的错误信息
+
+def msgbox(info,titletext='孤荷凌寒的DB模块对话框QQ578652607',style=0,isShowErrMsg=False):
+    return _mty.msgboxGhlh(info,titletext,style,isShowErrMsg)
+
+#连接网络数据库,目前支持mssql,mysql
+def conNetdbGhlh(serveraddress,usr,pw,dbname,dbtype='mssql',isShowMsg=False):
+    '''
+    用于连接网络数据库，目前支持连接mssql,mysql两种网络关系型数据库，
+    dbtype可选形参默认值是操作mssql，如果要连接Mysql则通过此可选形参指定：为mysql
+    ,此函数返回一个connect数据库连接对象
+    '''
+    global mdbErrString
+    mdbErrString=''
+    try:
+        if dbtype=='mssql':
+            con=pymssql.connect(serveraddress,usr,pw,dbname,charset='utf8')
+            return con
+        elif dbtype=='mysql':
+            con=pymysql.connect(serveraddress,usr,pw,dbname)
+            return con
+        else:
+            return None
+
+    except Exception as e:
+        mdbErrString='连接网络数据库【' + serveraddress + '】【' + dbname + '】时出错:' + str(e) + '\n此函数由【孤荷凌寒】创建,QQ578652607'
+        if isShowMsg==True:
+           msgbox(mdbErrString)
+        return None
+    else:
+        pass
+    finally:
+        pass
+
+#连接本地数据库文件，目前支持db,mdb,accdb,s3db
+def conLocaldbGhlh(dbfilepath,strPass='',isShowMsg=False):
+    '''
+    连接本地数据库文件，目前支持mdb,accdb,以及sqlite数据库文件，识别方法是，如果有后缀mdb或accdb，则说明是access数据库文件，否则都认为是sqlite数据库文件。
+    如果连接成功，将返回一个con数据库连接对象
+    '''
+    global mdbErrString
+    mdbErrString=''
+    try:
+        strhznm=_mty.getFilehzGhlh(dbfilepath)
+        if strhznm.find('mdb')>-1 or strhznm.find('accdb')>-1:
+            #---连接access数据库----
+            if strPass=='':
+                strname='Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=' + dbfilepath
+            else:
+                strname='Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=' + dbfilepath + ';Pwd=' + strPass
+            con=pypyodbc.connect(strname)
+            return con
+        else:
+            #----连接sqlite数据库-----
+            con=sqlite3.connect(dbfilepath)
+            return con
+
+    except Exception as e:
+        mdbErrString='连接网络数据库文件【' + dbfilepath + '】时出错:' + str(e) + '\n此函数由【孤荷凌寒】创建qq号是578652607'
+        if isShowMsg==True:
+           msgbox(mdbErrString)
+        return None
+    else:
+        pass
+    finally:
+        pass
+
+#删除数据库中的表
+def delTableGhlh(con,strtablenm,isShowMsg=False):
+    '''
+    此方法将删除指定conn中的table，不管table中是否有数据，因此 操作要谨慎
+    ,成功返回True 失败返回False
+    '''
+    global mdbErrString
+    mdbErrString=''
+
+    try:
+        if strtablenm is not None and strtablenm != '':
+            sql = 'DROP TABLE ' + strtablenm
+            cur=con.cursor()
+            cur.execute(sql)
+            con.commit()
+            cur.close()
+            if isShowMsg==True:
+                msgbox('删除数据库表[{}]成功!'.format(strtablenm))
+            return True
+        else:
+            if isShowMsg==True:
+                msgbox('the [{}] is empty or equal None!'.format(sql))
+            return False
+    except Exception as e:
+        mdbErrString='删除数据库中表【' + strtablenm + '】时出错:' + str(e) + '\n此函数由【孤荷凌寒】创建qq号是578652607'
+        if isShowMsg==True:
+           msgbox(mdbErrString)
+        return False
+    else:
+        pass
+    finally:
+        pass
+
+#创建一个新表
+def newTableGhlh(con,strTableNm,lstnm:'list. 将所有要新建的字段都放在一个列表中',lsttype,lstlength,dbtype='acc',lstNull=None,isDelExitsTable = False ,isAutoSetIDfieldAutoNumber=True,strSetFieldAutoNumberName='id',isShowMsg= False):
+    '''
+    传递有关表的每个字段的三大属性的分别的三个列表，
+    并可以指定此表的PRIMARY key 字段，
+    及指定是否自动识别ID字段为PRIMARY key 字段，
+    如果要创建的表名是否存在，约定是否删除旧表
+    如果设置为不删除旧表，则放弃新建表；
+    '''
+    global mdbErrString
+    mdbErrString=''
+    try:
+        cur=con.cursor()
+        dbtype=dbtype.lower()
+        if dbtype=='access':
+            dbtype='acc'
+    except:
+        pass
+    #--------------------------------------------------------
+    try:
+        if strTableNm == "" or strTableNm.lower() == "select" or strTableNm.lower() == "from" or strTableNm.lower() == "where" or strTableNm.lower() == "order" or strTableNm.lower() == "insert" or strTableNm.lower() == "delete" or strTableNm.lower() == "in" or strTableNm.lower() == "with" or strTableNm.find("[") >-1 or strTableNm.find("]") >-1 :
+            mdbErrString = "要创建的数据表名为空或为不合法的保留关键字，请重新确认数据表名。" + '\n此函数由【孤荷凌寒】创建qq是578652607'
+            if isShowMsg == True:
+                msgbox(mdbErrString)
+            return False
+
+        if len(lstnm) != len(lsttype) or len(lsttype) != len(lstlength):
+            mdbErrString = "在新建一个数据表时，接收到的四个关于表中字段属性的列表参数中元素总数不相同，无法执行。" + '\n此函数由【孤荷凌 寒】创建qq号：578652607'
+            if isShowMsg == True:
+                msgbox(mdbErrString)
+            
+            return False
+
+        #现在先检查表是否存在，如果存在，根据设置是删除旧表然后新建表呢，还是保留旧表而不新建表
+        if isTableExistGhlh(con,strTableNm,isShowMsg)==True:
+            #--如果旧表存在，就看是否要删除旧表---
+            if isDelExitsTable==True:
+                if delTableGhlh(con,strTableNm,isShowMsg)==False:
+                    #--旧表存在，但是却删除失败的情况----
+                    mdbErrString = "在新建一个数据表时，因为同名的旧表已经存在了，但尝试删除旧表失败，所以无法新增一个表。" + '\n此函数由【孤荷凌寒】创建qq：578652607'
+                    if isShowMsg == True:
+                        msgbox(mdbErrString)
+                    return False
+                else:
+                    #成功删除了旧表，那么就添加新表，直接顺序到后面执行代码即可。
+                    pass
+
+            else:
+                #如果旧表存在，但又指定不删除旧表，那么只好结束 本函数 过程了
+                mdbErrString = "在新建一个数据表时，因为同名的旧表已经存在了，而又指定不能删除旧表，所以无法新增一个表。" + '\n此函数由【孤 荷凌寒】创建qq是578652607'
+                if isShowMsg == True:
+                    msgbox(mdbErrString)
+                return False
+
+        #现在准备开始添加新的表-----
+        intC=len(lstnm)
+        rals=range(intC)
+        strR=""
+        strRls=""
+        strNm=""
+        strLs=""
+        intL=0
+        strL=""
+        strN=""
+        for i in rals:
+            strNm=lstnm[i]
+            strLs =lsttype[i]
+            strLs = getStandardFieldTypeGhlh(strLs,dbtype,isShowMsg)
+            strLs=' ' + strLs
+            #-----------------------
+            intL=lstlength[i]
+            if intL<=0:
+                strL=''
+            else:
+                strL="(" + str(intL) + ")"
+            #----------------
+            strN=""
+            if lstNull != None:
+                try:
+                    strN=lstNull[i]
+                except:
+                    pass
+                #---------------
+                if strN=="" or strN==None:
+                    strN=""
+                else:
+                    strN=" " + strN
+            #----------
+            if strLs.find('NULL')>=0:
+                #-----如果已经在得到类别时，已经在字符串中出现了null关键字，此处就不要再处理了
+                strN=""
+            #---------------
+            if dbtype!='mysql':
+                #上一条件式是因为，Mysql不允许在sql语句中出现 []括号
+                strNm='[' + strNm + ']'
+            strRls=strNm + strLs + strL + strN # 此时已经构建了类似于 【name varchar(20)】  这样的内容了
+            #检查是否主键--
+            if isAutoSetIDfieldAutoNumber==True:
+                #如果强制将字段名称为“id”的字段作为主键，则
+                if strNm.lower()==strSetFieldAutoNumberName.lower():
+                    if strR.find("PRIMARY KEY")<0:
+                        #上一条件式是为了避免有多个primary key
+                        if strRls.find("PRIMARY KEY")<0:
+                            #上一条件式是为了防止在取得可用字段类型时已添加过Primary key 了
+                            strRls=strRls+" PRIMARY KEY"
+            
+            #现在拼合 strR
+            if strR=="":
+                strR=strRls
+            else:
+                strR=strR + "," + strRls
+
+        #开始生成sql语句
+        strSql='CREATE TABLE ' + strTableNm + '(' + strR + ');'
+        #运行--
+        cur.execute(strSql)
+        con.commit() #提交所作的修改
+        #如果没有出错，就返回成功
+        return True
+
+            
+            
+
+
+
+    except Exception as e:
+        mdbErrString='尝试创建表【' + strTableNm + '】时出错:' + str(e) + '\n此函数由【孤荷凌寒】创建qq号是578652607'
+        if isShowMsg==True:
+           msgbox(mdbErrString)
+        return False
+    else:
+        pass
+    finally:
+        try:
+            cur.close()
+        except:
+            pass
+            
+#判断一个表在数据库中是否存在
+def isTableExistGhlh(con,strtablenm,isShowMsg=False):
+    '''
+    判断一张表是否在数据库中存在
+    ,需要传入con数据库连接对象
+    '''
+    global mdbErrString
+    mdbErrString=''
+    try:
+        cura=con.cursor()
+        return isTableExist2Ghlh(cura,strtablenm,isShowMsg)
+        
+    except Exception as e:
+        mdbErrString='检查表【' + strtablenm + '】是否存在时出错（此错误一般说明表不存在）:' + str(e) + '\n此函数由【孤荷凌 寒】创建qq号是578652607'
+        if isShowMsg==True:
+           msgbox(mdbErrString)
+        return False
+    else:
+        pass
+    finally:
+        try:
+            cura.close
+            #pass
+        except:
+            pass
+        
+
+#判断一个表在数据库中是否存在2
+def isTableExist2Ghlh(cur,strtablenm,isShowMsg=False):
+    '''
+    判断一张表是否在数据库中存在
+    ,需要传入数据库操作指针对象
+    '''
+    global mdbErrString
+    mdbErrString=''
+    try:
+        strsql='SELECT * FROM ' + strtablenm + ';'
+        cur.execute(strsql)
+        return True
+    except Exception as e:
+        mdbErrString='检查表【' + strtablenm + '】是否存在时出错（此错误一般说明表不存在）:' + str(e) + '\n此函数由【孤 荷凌寒】创建qq号是578652607'
+        if isShowMsg==True:
+           msgbox(mdbErrString)
+        return False
+    else:
+        pass
+    finally:
+        pass
+
+#将各种复杂的对数据库类型的描述，如3,8等数值表示的字段类型与，windows系统中的system.string,之类的描述，统一修改为数据库能够在定义字段类型时直接使用的描述字符串
+def getStandardFieldTypeGhlh(strin,dbtype='acc',isShowMsg=False):
+    '''
+    将各种复杂的对数据库类型的描述，如3,8等数值表示的字段类型与，windows系统中的system.string,之类的描述，统一修改为数据库能够在定义字段类型时直接使用的描述字符串
+    '''
+    global mdbErrString
+    mdbErrString=''
+    strI=""
+    try:
+        strI=str(strin)
+        strI.lower()
+        strI=strI.replace('system.','') #windows系统中，以及其它一些语言中对数据类型的描述的字符串中，可以包含有system.前缀
+        strI=strI.replace('.','') #去掉多余的点
+        dbtype=dbtype.lower()
+        if dbtype=='access':
+            dbtype='acc'
+    except:
+        pass
+    #--------------------------------------------------------
+    try:
+        if strI=='':
+            mdbErrString = "因为传入的要识别的数据库的字段类型为空，因此无法识别，只能识别成【文本类型】【text】。" + '\n此函数由【孤荷.凌寒】创建qq：578652607'
+            if isShowMsg == True:
+                msgbox(mdbErrString)
+            if dbtype!='acc' and dbtype!='mysql':
+                return 'ntext'
+            else:
+                return 'text'
+        #---正式识别开始---------------------
+        if strI in ("int32", "3", "int","int16", "integer", "long","smallint","tinyint","mediumint"):
+            if dbtype=='acc':
+                return 'long'
+            else:
+                return "int"  #多数数据库在这种情况下要额外指定长度
+        #----------------------
+        if strI=='bigint':
+            if dbtype=='acc' or dbtype=='sqlite':
+                return 'int'
+            else:
+                return 'bigint'
+        #-----------------
+        elif strI in ("memo","longtext","mediumtext"):
+            if dbtype=='acc':
+                return "memo"
+            elif dbtype=='mysql':
+                return "longtext"
+            else:
+                return 'ntext'
+        #------------------
+        elif strI in ("str","string","8","varchar","char","text","nvarchar","tinytext"):
+            if dbtype=='mysql' or dbtype=='acc':
+                return "varchar"  #在这种情况下都需要指定长度
+            else:
+                return "nvarchar"  #在这种情况下都需要指定长度
+        #------------------
+        elif strI in ("datetime","7"):
+            if dbtype=='sqlite':
+                return "date"
+            else:
+                return "datetime"
+        #----------------
+        elif strI=="date":
+            if dbtype!='acc':
+                return "date"
+            else:
+                return "datetime"                
+        #-----------------
+        elif strI=="time":
+            if dbtype!='acc':
+                return "time"
+            else:
+                return "datetime"                
+
+        #-----------------
+        elif strI in ("single", "4", "real"):
+            return "real"
+
+        #----------------
+        elif strI in ("double", "5", "float"):
+            return "float"
+        #----------------
+        elif strI in ("boolean", "11", "bit","bool"):
+            if dbtype=='mssql' or dbtype=='acc':
+                return "bit"
+            else:
+                return 'boolean'
+        #-----------------
+        elif strI in ("byte[]", "8209", "image", "binary", "ole"):
+            #---image为微软专用的OLE，"Binary" 为 二进制，在sqlite中使用blob,表示二进制大数据
+            if dbtype=='acc' or dbtype=='mssql':
+                return "Image"
+            elif dbtype=='sqlite':
+                return 'blob'
+            else:
+                return 'binary'
+        #-------这是真正的全精度数据
+        elif strI in ("decimal", "14", "money","numeric"):
+            if dbtype=='sqlite':
+                return 'numeric'
+            elif dbtype=='acc':
+                return 'money'
+            else:
+                return 'decimal'
+
+        #--------------
+        elif strI=="timestamp":
+            if dbtype=='acc':
+                return 'double'
+            else:
+                return 'timestamp'
+            
+        #------自动编号------       
+        elif strI in ("auto", "autocount", "autonumber", "autono", "autoincrement","auto_increment"):
+            if dbtype=='mysql':
+                return 'int NOT NULL auto_increment'
+            elif dbtype=='acc':
+                return 'counter NOT NULL PRIMARY KEY'
+            elif dbtype=='mssql':
+                return 'int identity(1,1)'
+            else:
+                #--sqlite-----------------
+                return "integer PRIMARY KEY AUTOINCREMENT NOT NULL"
+        
+        #--------
+        else:
+            #其余情况，全部识别为 text
+            if dbtype!='acc' and dbtype!='mysql':
+                return 'ntext'
+            else:
+                return 'text'
+
+    except Exception as e:
+        mdbErrString='尝试将各种不同的对数据库字段类型的描述转换为标准字段类型描述时出错:' + str(e) + '\n此函数由【孤荷 凌寒】创建qq号是578652607'
+        if isShowMsg==True:
+           msgbox(mdbErrString)
+        #------------------------------------------
+        if dbtype!='acc' and dbtype!='mysql':
+            return 'ntext'
+        else:
+            return 'text'
+    else:
+        pass
+    finally:
+        pass
+
+我已经将我的自建模块托管到github.com上，下面是地址：
+https://github.com/lhghroom/python3_mod_db
+
+（一）书写这个模块花了五个小时，统一操作目前我习惯使用的四种数据库：
+mysql
+mssql
+access
+sqlite
+
+其实他们内部的字段的数据类型是有细微的差别的，虽然都是使用统一的关系数据库的SQL语句来进行操作，但细节上略有不同，造成了很大的麻烦，但我需要却是一个可以通吃所有数据库的全能通用模块，便花了大量时间来学习研究几大数据库中字段类型声明上的不同，并且分析最优选择。
+下面是我个人分析的最优取舍，因此上面我建构的函数其实不能“创建所有字段”类型的数据表。只能创建出最优选择的字段类型的数据表！
+我个人目前以为的最优选择如下：
+1.短字符类型
+char  这是定长的字符类型数据，获取速度上有优势，但根据我个人以往编程经验，认为在程序获取数据库中数据时，处理起来比较麻烦。
+varchar 这是变长的字符类型数据，但却是Ansi编码，对中文支持差
+nvarchar 这是变长的字符类型数据，使用Unicode字符编码，因此推荐使用
+2.长字符类型
+text  却使用的是Ansi编码，对中文支持存在问题
+ntext 这是推荐使用的，针对Unicode编码
+longtext  mysql数据库推荐使用这种容量大的类型
+memo  access数据库独有的数据类型，容量大的字符数据类型
+3.低精度的数值类型
+（1）
+smallint
+tinyint
+以上两种是容量比较小的整型数据类型，我个人一般不使用，因此在我自定义的函数中全部规划为使用int(integer)
+（2）
+int
+integer (sqlite数据库中，是这样的标记)
+这是标准的整型数据类型，多数情况下使用这种类型。
+（3）
+bigint
+long
+以上两种是长整型数据类型。
+（4）
+single
+real
+double
+float
+以上是模拟精度的数据类型，在财务类数据库中切勿使用。
+２．完全精度的数值类型
+decimal
+numeric
+money  (这是ACEESS数据库唯一能够支持在create table　的ＳＱＬ语句中使用的完全精度数据类型。)
+以上三种类型才是真正的全精度数据类型。
+
+鉴于以上我的个人分析，在我的自定义函数中，对常用的文本类型与数值类型的字段的类型进行了简化推荐使用。
+
+（二）能够在同一个函数中实现执行四种不同数据库的【新建数据表】的操作，真正得益于python这种语言的不强制性的变量类型声明，这使得在为函数声明形参时，不用强制规定形参的数据类型。
+本来mysql  mssql  access  sqlite 四种数据库操作它们的类模块都是不同的，连接他们获取得到的
+数据库连接对象con
+是四种不同的类的对象。
+但由于python的这种便利性，使得我在这一个函数中，对形参【con】传入哪种类的对象，都可以完美执行。这样使我对python的喜爱更上一层！
+
+二、作为这一天学习的收尾，我在上一天的数据库测试用的py文件的基础上进行了修改，完成了对今天新建的两个自定义模块的完整测试文件 
+windows10环境下我的测试文件内容：
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+import pypyodbc
+import pymysql
+import pymssql
+import sqlite3
+
+import _mty
+import _mdb
+
+def msgbox(info,titletext='孤荷凌寒的对话框QQ578652607',style=0,isShowErrMsg=False):
+    return _mty.msgboxGhlh(info,titletext,style,isShowErrMsg)
+
+def conmssql():
+    try:
+        con=_mdb.conNetdbGhlh("local", "mssql", "abc123", "mssql")
+        #pymssql没有execute()方法，游标cusor对象有这个方法
+        msgbox('mssql')
+        cur=con.cursor()
+        cur.execute('select * from m;')
+        data=cur.fetchall()
+        msgbox(str(data))
+        cur.close()
+        #创建一张表-----
+        lstNm=['id','nm','sex','yuwen','shuxue','age','birth','memo','img','ispass']
+        lstT=['auto','str','str','double','numeric','int','datetime','memo','ole','bool']
+        lstL=[0,10,2,0,0,0,0,0,0,0]
+        a=_mdb.newTableGhlh(con,'ghlhstable',lstNm,lstT,lstL,'mssql',None,True)
+        msgbox(str(a))
+
+        msgbox('ghlhstable存在吗？\n' + str(_mdb.isTableExistGhlh(con,'ghlhstable')))
+        
+        
+        con.close()
+    except Exception as e:
+        msgbox('出错了'+ str(e),'出错',16)
+
+def conmysql():
+    try:
+        con=_mdb.conNetdbGhlh("localhost", "root", "abc123", "mysql",'mysql',True)
+        #pymysql没有execute()方法，游标cusor对象有这个方法
+        msgbox('mysql')
+        cur=con.cursor()
+        cur.execute("select * from m;")
+        data=cur.fetchall()
+        msgbox(str(data))
+        cur.close()
+
+        #创建一张表-----
+        lstNm=['id','nm','sex','yuwen','shuxue','age','birth','memo','img','ispass']
+        lstT=['auto','str','str','double','numeric','int','datetime','memo','ole','bool']
+        lstL=[0,      10,    2,     0,      0,        4,     0,        0,     8,    0]
+        a=_mdb.newTableGhlh(con,'ghlhstable',lstNm,lstT,lstL,'mysql',None,True)
+        msgbox(str(a))
+
+        msgbox('ghlhstable存在吗？\n' + str(_mdb.isTableExistGhlh(con,'ghlhstable')))
+        
+
+        con.close()
+    except Exception as e:
+        msgbox('出错了'+ str(e),'出错',16)
+
+def consqlite():
+    try:
+        stra=r'C:\ProgramData\SQLITE3\slone.s3db'
+        con=_mdb.conLocaldbGhlh(stra)
+        msgbox('sqlite')
+        cur=con.cursor()
+        cur.execute("select * from student;")
+        data=cur.fetchall()
+        msgbox(str(data))
+        cur.close()
+
+        #创建一张表-----
+        lstNm=['id','nm','sex','yuwen','shuxue','age','birth','memo','img','ispass']
+        lstT=['auto','str','str','double','numeric','int','datetime','memo','ole','bool']
+        lstL=[0,      10,    2,     0,      0,        4,     0,        0,     8,    0]
+        a=_mdb.newTableGhlh(con,'ghlhstable',lstNm,lstT,lstL,'sqlite',None,True)
+        msgbox(str(a))
+
+        msgbox('ghlhstable存在吗？\n' + str(_mdb.isTableExistGhlh(con,'ghlhstable')))
+
+        con.close()
+    except Exception as e:
+        msgbox('出错了'+ str(e),'出错',16)
+
+def conaccess():
+    try:
+        stra=r'I:\新建文件夹\Database2.mdb'
+        #stra=r'I:\新建文件夹\Database1.accdb'
+        con=_mdb.conLocaldbGhlh(stra,'',True)
+
+        msgbox('accese')
+
+        cur=con.cursor()
+        cur.execute("select * from m;")
+        data=cur.fetchall()
+        msgbox(str(data))
+        cur.close()
+
+        #创建一张表-----
+        lstNm=['id','nm','sex','yuwen','shuxue','age','birth','memo','img','ispass']
+        lstT=['auto','str','str','double','numeric','int','datetime','memo','ole','bool']
+        lstL=[0,      10,    2,     0,      0,        0,     0,        0,     0,    0]
+        a=_mdb.newTableGhlh(con,'ghlhstable',lstNm,lstT,lstL,'acc',None,True)
+        msgbox(str(a))
+        
+        msgbox('ghlhstable存在吗？\n' + str(_mdb.isTableExistGhlh(con,'ghlhstable')))
+        
+        con.close()
+    except Exception as e:
+        msgbox('出错了'+ str(e),'出错',16)
+
+def main():
+    conmysql()
+    conmssql()
+    consqlite()
+    conaccess()
+
+if __name__ == "__main__":
+    main()
+运行全部成功，详细过程可以见我的操作过程屏录。
+然后在LINUX系统下，也就是我的fedora28系统下进行了测试
+在linux下测试的文件 如下：
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+import pypyodbc
+import pymysql
+import pymssql
+import sqlite3
+
+import _mty
+import _mdb
+
+def msgbox(info,titletext='孤荷凌寒的对话框QQ578652607',style=0,isShowErrMsg=False):
+    return _mty.msgboxGhlh(info,titletext,style,isShowErrMsg)
+
+def conmssql():
+    try:
+        con=_mdb.conNetdbGhlh("localhost", "mssql", "abc123", "mssql")
+        #pymssql没有execute()方法，游标cusor对象有这个方法
+        msgbox('mssql')
+        cur=con.cursor()
+        cur.execute('select * from m;')
+        data=cur.fetchall()
+        msgbox(str(data))
+        cur.close()
+        #创建一张表-----
+        lstNm=['id','nm','sex','yuwen','shuxue','age','birth','memo','img','ispass']
+        lstT=['auto','str','str','double','numeric','int','datetime','memo','ole','bool']
+        lstL=[0,30,3,0,0,0,0,0,0,0]
+        a=_mdb.newTableGhlh(con,'ghlhst',lstNm,lstT,lstL,'mssql',None,True)
+        msgbox(str(a))
+
+        msgbox('ghlhst存在吗？\n' + str(_mdb.isTableExistGhlh(con,'ghlhst')))
+        
+        
+        con.close()
+    except Exception as e:
+        msgbox('出错了'+ str(e),'出错',16)
+
+def conmysql():
+    try:
+        con=_mdb.conNetdbGhlh("192.168.1.102", "root", "abc123", "mysql",'mysql',True)
+        #pymysql没有execute()方法，游标cusor对象有这个方法
+        msgbox('mysql')
+        #cur=con.cursor()
+        #cur.execute("select * from m;")
+        #data=cur.fetchall()
+        #msgbox(str(data))
+        #cur.close()
+
+        #创建一张表-----
+        lstNm=['id','nm','sex','yuwen','shuxue','age','birth','memo','img','ispass']
+        lstT=['auto','str','str','double','numeric','int','datetime','memo','ole','bool']
+        lstL=[0,      30,    3,     0,      0,        4,     0,        0,     8,    0]
+        a=_mdb.newTableGhlh(con,'ghlhst',lstNm,lstT,lstL,'mysql',None,True)
+        msgbox(str(a))
+
+        msgbox('ghlhst存在吗？\n' + str(_mdb.isTableExistGhlh(con,'ghlhst')))
+        
+
+        con.close()
+    except Exception as e:
+        msgbox('出错了'+ str(e),'出错',16)
+
+def consqlite():
+    try:
+        stra=r'/home/pw/eclipse-workspace/db/data/slone.s3db'
+        con=_mdb.conLocaldbGhlh(stra)
+        msgbox('sqlite')
+        cur=con.cursor()
+        cur.execute("select * from student;")
+        data=cur.fetchall()
+        msgbox(str(data))
+        cur.close()
+
+        #创建一张表-----
+        lstNm=['id','nm','sex','yuwen','shuxue','age','birth','memo','img','ispass']
+        lstT=['auto','str','str','double','numeric','int','datetime','memo','ole','bool']
+        lstL=[0,      30,    3,     0,      0,        4,     0,        0,     8,    0]
+        a=_mdb.newTableGhlh(con,'ghlhst',lstNm,lstT,lstL,'sqlite',None,True)
+        msgbox(str(a))
+
+        msgbox('ghlhst存在吗？\n' + str(_mdb.isTableExistGhlh(con,'ghlhst')))
+
+        con.close()
+    except Exception as e:
+        msgbox('出错了'+ str(e),'出错',16)
+
+def conaccess():
+    try:
+        stra=r'/home/pw/eclipse-workspace/db/data/Database2.mdb'
+        #stra=r'/home/pw/eclipse-workspace/db/data/Database1.accdb'
+        con=_mdb.conLocaldbGhlh(stra,'',True)
+
+        msgbox('accese')
+
+        cur=con.cursor()
+        cur.execute("select * from m;")
+        data=cur.fetchall()
+        msgbox(str(data))
+        cur.close()
+
+        #创建一张表-----
+        lstNm=['id','nm','sex','yuwen','shuxue','age','birth','memo','img','ispass']
+        lstT=['auto','str','str','double','numeric','int','datetime','memo','ole','bool']
+        lstL=[0,      10,    2,     0,      0,        0,     0,        0,     0,    0]
+        a=_mdb.newTableGhlh(con,'ghlhstable',lstNm,lstT,lstL,'acc',None,True)
+        msgbox(str(a))
+        
+        msgbox('ghlhstable存在吗？\n' + str(_mdb.isTableExistGhlh(con,'ghlhstable')))
+        
+        con.close()
+    except Exception as e:
+        msgbox('出错了'+ str(e),'出错',16)
+
+def main():
+    conmysql()
+    conmssql()
+    consqlite()
+    #conaccess()
+
+if __name__ == "__main__":
+    main()
+在linux下的测试仍然完全成功，但没有对access数据库进行测试，因为至今我还没有解决在linux下对access的支持。
+
+
+就是要学  社群  www.941xue.com/index.aspx 
+ 原文地址：http://www.941xue.com/content.aspx?id=1391 
+本笔记在B站上的视频地址：      https://www.bilibili.com/video/BV1Qt411Y7V2/ 
+Github:
+https://github.com/lhghroom/ZeroBasicSelfStudyPython 
+
+【欢迎大家加入[就是要学]社群】
+如今，这个世界的变化与科技的发展就像一个机器猛兽，它跑得越来越快，跑得越来越快，在我们身后追赶着我们。
+很多人很早就放弃了成长，也就放弃了继续奔跑，多数人保持终身不变的样子，原地不动，成为那猛兽的肚中餐——当然那也不错，在猛兽的逼迫下，机械的重复着自我感觉还良好地稳定工作与生活——而且多半感觉不到这有什么不正常的地方，因为在猛兽肚子里的是大多数人，就好像大多数人都在一个大坑里，也就感觉不出来这是一个大坑了，反而坑外的世界显得有些不大正常。
+为什么我们不要做坑里的大多数人？
+因为真正的人生，应当有百万种可能 ；因为真正的一生可以有好多辈子组成，每一辈子都可以做自己喜欢的事情；因为真正的人生，应当有无数种可以选择的权利，而不是总觉得自己别无选择。因为我们要成为一九法则中为数不多的那个一；因为我们要成为自己人生的导演而不是被迫成为别人安排的戏目中的演员。
+【请注意】
+就是要学社群并不会告诉你怎样一夜暴富！也不会告诉你怎样不经努力就实现梦想！
+【请注意】
+就是要学社群并没有任何可以应付未来一切变化的独门绝技，也没有值得吹嘘的所谓价值连城的成功学方法论！
+【请注意】
+社群只会互相帮助，让每个人都看清自己在哪儿，自己是怎样的，重新看见心中的梦想，唤醒各自内心中的那个英雄，然后勇往直前，成为自己想要成为的样子！
+期待与你并肩奔赴未来！
+www.941xue.com 
+QQ群：646854445 （【就是要学】终身成长）
+ 
+
+
+我的学习过程录像百度盘地址分享如下：（清晰度：1280x720）
+链接：https://pan.baidu.com/s/1iOf11tkYOzMOpkHZ5wxfsg 
+提取码：fsjy
+
+Bilibili:
+https://www.bilibili.com/video/av38764044/ 
+
+喜马拉雅语音笔记：
+https://www.ximalaya.com/keji/19103006/147022762 
+
+
+

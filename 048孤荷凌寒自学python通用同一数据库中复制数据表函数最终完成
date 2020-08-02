@@ -1,0 +1,741 @@
+孤荷凌寒自学python第四十八天通用同一数据库中复制数据表函数最终完成
+
+（完整学习过程屏幕记录视频地址在文末）
+今天继续建构自感觉用起来顺手些的自定义模块和类的代码。
+今天经过反复折腾，最终基本上算是比较好地完成了这个在同一数据库中复制数据表的函数，且同一函数支持目前研究的四种数据库（mysql,mssql,access,sqlite）.
+一、首先是到今天完成为止的_mdb.py文件中的全部内容：
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+import pypyodbc
+import pymysql
+import pymssql
+import sqlite3
+
+import os.path
+
+import _mty
+
+mdbErrString='' #供其它模块使用的全局变量了，实时保存了各函数执行时的错误信息
+
+def msgbox(info,titletext='孤荷凌寒的DB模块对话框QQ578652607',style=0,isShowErrMsg=False):
+    return _mty.msgboxGhlh(info,titletext,style,isShowErrMsg)
+
+#连接网络数据库,目前支持mssql,mysql
+def conNetdbGhlh(serveraddress,usr,pw,dbname,dbtype='mssql',isShowMsg=False):
+    '''
+    用于连接网络数据库，目前支持连接mssql,mysql两种网络关系型数据库，
+    dbtype可选形参默认值是操作mssql，如果要连接Mysql则通过此可选形参指定：为mysql
+    ,此函数返回一个connect数据库连接对象
+    '''
+    global mdbErrString
+    mdbErrString=''
+    try:
+        if dbtype=='mssql':
+            con=pymssql.connect(serveraddress,usr,pw,dbname,charset='utf8')
+            return con
+        elif dbtype=='mysql':
+            con=pymysql.connect(serveraddress,usr,pw,dbname)
+            return con
+        else:
+            return None
+
+    except Exception as e:
+        mdbErrString='连接网络数据库【' + serveraddress + '】【' + dbname + '】时出错:' + str(e) + '\n此函数由【孤荷凌寒】创建,QQ578652607'
+        if isShowMsg==True:
+           msgbox(mdbErrString)
+        return None
+    else:
+        pass
+    finally:
+        pass
+
+#连接本地数据库文件，目前支持db,mdb,accdb,s3db
+def conLocaldbGhlh(dbfilepath,strPass='',isShowMsg=False):
+    '''
+    连接本地数据库文件，目前支持mdb,accdb,以及sqlite数据库文件，识别方法是，如果有后缀mdb或accdb，则说明是access数据库文件，否则都认为是sqlite数据库文件。
+    如果连接成功，将返回一个con数据库连接对象
+    '''
+    global mdbErrString
+    mdbErrString=''
+    try:
+        strhznm=_mty.getFilehzGhlh(dbfilepath)
+        if strhznm.find('mdb')>-1 or strhznm.find('accdb')>-1:
+            #---连接access数据库----
+            if strPass=='':
+                strname='Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=' + dbfilepath
+            else:
+                strname='Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=' + dbfilepath + ';Pwd=' + strPass
+            con=pypyodbc.connect(strname)
+            return con
+        else:
+            #----连接sqlite数据库-----
+            con=sqlite3.connect(dbfilepath)
+            return con
+
+    except Exception as e:
+        mdbErrString='连接网络数据库文件【' + dbfilepath + '】时出错:' + str(e) + '\n此函数由【孤荷凌寒】创建qq号是578652607'
+        if isShowMsg==True:
+           msgbox(mdbErrString)
+        return None
+    else:
+        pass
+    finally:
+        pass
+
+#删除数据库中的表
+def delTableGhlh(con,strtablenm,isShowMsg=False):
+    '''
+    此方法将删除指定conn中的table，不管table中是否有数据，因此 操作要谨慎
+    ,成功返回True 失败返回False
+    '''
+    global mdbErrString
+    mdbErrString=''
+
+    try:
+        if strtablenm is not None and strtablenm != '':
+            sql = 'DROP TABLE ' + strtablenm
+            cur=con.cursor()
+            cur.execute(sql)
+            con.commit()
+            cur.close()
+            if isShowMsg==True:
+                msgbox('删除数据库表[{}]成功!'.format(strtablenm))
+            return True
+        else:
+            if isShowMsg==True:
+                msgbox('the [{}] is empty or equal None!'.format(sql))
+            return False
+    except Exception as e:
+        mdbErrString='删除数据库中表【' + strtablenm + '】时出错:' + str(e) + '\n此函数由【孤荷凌寒】创建qq号是578652607'
+        if isShowMsg==True:
+           msgbox(mdbErrString)
+        return False
+    else:
+        pass
+    finally:
+        pass
+
+#创建一个新表
+def newTableGhlh(con,strTableNm,lstnm:'list. 将所有要新建的字段都放在一个列表中',lsttype,lstlength,dbtype='acc',lstNull=None,isDelExitsTable = False ,isAutoSetIDfieldAutoNumber=True,strSetFieldAutoNumberName='id',isShowMsg= False):
+    '''
+    传递有关表的每个字段的三大属性的分别的三个列表，
+    并可以指定此表的PRIMARY key 字段，
+    及指定是否自动识别ID字段为PRIMARY key 字段，
+    如果要创建的表名是否存在，约定是否删除旧表
+    如果设置为不删除旧表，则放弃新建表；
+    '''
+    global mdbErrString
+    mdbErrString=''
+    try:
+        cur=con.cursor()
+        dbtype=dbtype.lower()
+        if dbtype=='access':
+            dbtype='acc'
+    except:
+        pass
+    #--------------------------------------------------------
+    try:
+        if strTableNm == "" or strTableNm.lower() == "select" or strTableNm.lower() == "from" or strTableNm.lower() == "where" or strTableNm.lower() == "order" or strTableNm.lower() == "insert" or strTableNm.lower() == "delete" or strTableNm.lower() == "in" or strTableNm.lower() == "with" or strTableNm.find("[") >-1 or strTableNm.find("]") >-1 :
+            mdbErrString = "要创建的数据表名为空或为不合法的保留关键字，请重新确认数据表名。" + '\n此函数由【孤荷凌寒】创建qq是578652607'
+            if isShowMsg == True:
+                msgbox(mdbErrString)
+            return False
+
+        if len(lstnm) != len(lsttype) or len(lsttype) != len(lstlength):
+            mdbErrString = "在新建一个数据表时，接收到的四个关于表中字段属性的列表参数中元素总数不相同，无法执行。" + '\n此函数由【孤荷凌寒】创建qq号：578652607'
+            if isShowMsg == True:
+                msgbox(mdbErrString)
+            
+            return False
+
+        #现在先检查表是否存在，如果存在，根据设置是删除旧表然后新建表呢，还是保留旧表而不新建表
+        if isTableExistGhlh(con,strTableNm,isShowMsg)==True:
+            #--如果旧表存在，就看是否要删除旧表---
+            if isDelExitsTable==True:
+                if delTableGhlh(con,strTableNm,isShowMsg)==False:
+                    #--旧表存在，但是却删除失败的情况----
+                    mdbErrString = "在新建一个数据表时，因为同名的旧表已经存在了，但尝试删除旧表失败，所以无法新增一个表。" + '\n此函数由【孤荷凌寒】创建qq：578652607'
+                    if isShowMsg == True:
+                        msgbox(mdbErrString)
+                    return False
+                else:
+                    #成功删除了旧表，那么就添加新表，直接顺序到后面执行代码即可。
+                    pass
+
+            else:
+                #如果旧表存在，但又指定不删除旧表，那么只好结束 本函数 过程了
+                mdbErrString = "在新建一个数据表时，因为同名的旧表已经存在了，而又指定不能删除旧表，所以无法新增一个表。" + '\n此函数由【孤荷凌寒】创建qq是578652607'
+                if isShowMsg == True:
+                    msgbox(mdbErrString)
+                return False
+
+        #现在准备开始添加新的表-----
+        intC=len(lstnm)
+        rals=range(intC)
+        strR=""
+        strRls=""
+        strNm=""
+        strLs=""
+        intL=0
+        strL=""
+        strN=""
+        for i in rals:
+            strNm=lstnm[i]
+            strLs =lsttype[i]
+            strLs = getStandardFieldTypeGhlh(strLs,dbtype,isShowMsg)
+            strLs=' ' + strLs
+            #-----------------------
+            intL=lstlength[i]
+            if intL<=0:
+                strL=''
+            else:
+                strL="(" + str(intL) + ")"
+            #----------------
+            strN=""
+            if lstNull != None:
+                try:
+                    strN=lstNull[i]
+                except:
+                    pass
+                #---------------
+                if strN=="" or strN==None:
+                    strN=""
+                else:
+                    strN=" " + strN
+            #----------
+            if strLs.find('NULL')>=0:
+                #-----如果已经在得到类别时，已经在字符串中出现了null关键字，此处就不要再处理了
+                strN=""
+            #---------------
+            if dbtype!='mysql':
+                #上一条件式是因为，Mysql不允许在sql语句中出现 []括号
+                strNm='[' + strNm + ']'
+            strRls=strNm + strLs + strL + strN # 此时已经构建了类似于 【name varchar(20)】  这样的内容了
+            #检查是否主键--
+            if isAutoSetIDfieldAutoNumber==True:
+                #如果强制将字段名称为“id”的字段作为主键，则
+                if strNm.lower()==strSetFieldAutoNumberName.lower():
+                    if strR.find("PRIMARY KEY")<0:
+                        #上一条件式是为了避免有多个primary key
+                        if strRls.find("PRIMARY KEY")<0:
+                            #上一条件式是为了防止在取得可用字段类型时已添加过Primary key 了
+                            strRls=strRls+" PRIMARY KEY"
+            
+            #现在拼合 strR
+            if strR=="":
+                strR=strRls
+            else:
+                strR=strR + "," + strRls
+
+        #开始生成sql语句
+        strSql='CREATE TABLE ' + strTableNm + '(' + strR + ');'
+        #运行--
+        cur.execute(strSql)
+        con.commit() #提交所作的修改
+        #如果没有出错，就返回成功
+        return True
+
+            
+            
+
+
+
+    except Exception as e:
+        mdbErrString='尝试创建表【' + strTableNm + '】时出错:' + str(e) + '\n此函数由【孤荷凌寒】创建qq号是578652607'
+        if isShowMsg==True:
+           msgbox(mdbErrString)
+        return False
+    else:
+        pass
+    finally:
+        try:
+            cur.close()
+        except:
+            pass
+            
+#判断一个表在数据库中是否存在
+def isTableExistGhlh(con,strtablenm,isShowMsg=False):
+    '''
+    判断一张表是否在数据库中存在
+    ,需要传入con数据库连接对象
+    '''
+    global mdbErrString
+    mdbErrString=''
+    try:
+        cura=con.cursor()
+        return isTableExist2Ghlh(cura,strtablenm,isShowMsg)
+        
+    except Exception as e:
+        mdbErrString='检查表【' + strtablenm + '】是否存在时出错（此错误一般说明表不存在）:' + str(e) + '\n此函数由【孤荷凌寒】创建qq号是578652607'
+        if isShowMsg==True:
+           msgbox(mdbErrString)
+        return False
+    else:
+        pass
+    finally:
+        try:
+            cura.close
+            #pass
+        except:
+            pass
+        
+
+#判断一个表在数据库中是否存在2
+def isTableExist2Ghlh(cur,strtablenm,isShowMsg=False):
+    '''
+    判断一张表是否在数据库中存在
+    ,需要传入数据库操作指针对象
+    '''
+    global mdbErrString
+    mdbErrString=''
+    try:
+        strsql='SELECT * FROM ' + strtablenm + ';'
+        cur.execute(strsql)
+        return True
+    except Exception as e:
+        mdbErrString='检查表【' + strtablenm + '】是否存在时出错（此错误一般说明表不存在）:' + str(e) + '\n此函数由【孤荷凌寒】创建qq号是578652607'
+        if isShowMsg==True:
+           msgbox(mdbErrString)
+        return False
+    else:
+        pass
+    finally:
+        pass
+
+#将各种复杂的对数据库类型的描述，如3,8等数值表示的字段类型与，windows系统中的system.string,之类的描述，统一修改为数据库能够在定义字段类型时直接使用的描述字符串
+def getStandardFieldTypeGhlh(strin,dbtype='acc',isShowMsg=False):
+    '''
+    将各种复杂的对数据库类型的描述，如3,8等数值表示的字段类型与，windows系统中的system.string,之类的描述，统一修改为数据库能够在定义字段类型时直接使用的描述字符串
+    '''
+    global mdbErrString
+    mdbErrString=''
+    strI=""
+    try:
+        strI=str(strin)
+        strI.lower()
+        strI=strI.replace('system.','') #windows系统中，以及其它一些语言中对数据类型的描述的字符串中，可以包含有system.前缀
+        strI=strI.replace('.','') #去掉多余的点
+        dbtype=dbtype.lower()
+        if dbtype=='access':
+            dbtype='acc'
+    except:
+        pass
+    #--------------------------------------------------------
+    try:
+        if strI=='':
+            mdbErrString = "因为传入的要识别的数据库的字段类型为空，因此无法识别，只能识别成【文本类型】【text】。" + '\n此函数由【孤荷凌寒】创建qq：578652607'
+            if isShowMsg == True:
+                msgbox(mdbErrString)
+            if dbtype!='acc' and dbtype!='mysql':
+                return 'ntext'
+            else:
+                return 'text'
+        #---正式识别开始---------------------
+        if strI in ("int32", "3", "int","int16", "integer", "long","smallint","tinyint","mediumint"):
+            if dbtype=='acc':
+                return 'long'
+            else:
+                return "int"  #多数数据库在这种情况下要额外指定长度
+        #----------------------
+        if strI=='bigint':
+            if dbtype=='acc' or dbtype=='sqlite':
+                return 'int'
+            else:
+                return 'bigint'
+        #-----------------
+        elif strI in ("memo","longtext","mediumtext"):
+            if dbtype=='acc':
+                return "memo"
+            elif dbtype=='mysql':
+                return "longtext"
+            else:
+                return 'ntext'
+        #------------------
+        elif strI in ("str","string","8","varchar","char","text","nvarchar","tinytext"):
+            if dbtype=='mysql' or dbtype=='acc':
+                return "varchar"  #在这种情况下都需要指定长度
+            else:
+                return "nvarchar"  #在这种情况下都需要指定长度
+        #------------------
+        elif strI in ("datetime","7"):
+            if dbtype=='sqlite':
+                return "date"
+            else:
+                return "datetime"
+        #----------------
+        elif strI=="date":
+            if dbtype!='acc':
+                return "date"
+            else:
+                return "datetime"                
+        #-----------------
+        elif strI=="time":
+            if dbtype!='acc':
+                return "time"
+            else:
+                return "datetime"                
+
+        #-----------------
+        elif strI in ("single", "4", "real"):
+            return "real"
+
+        #----------------
+        elif strI in ("double", "5", "float"):
+            return "float"
+        #----------------
+        elif strI in ("boolean", "11", "bit","bool"):
+            if dbtype=='mssql' or dbtype=='acc':
+                return "bit"
+            else:
+                return 'boolean'
+        #-----------------
+        elif strI in ("byte[]", "8209", "image", "binary", "ole"):
+            #---image为微软专用的OLE，"Binary" 为 二进制，在sqlite中使用blob,表示二进制大数据
+            if dbtype=='acc' or dbtype=='mssql':
+                return "Image"
+            elif dbtype=='sqlite':
+                return 'blob'
+            else:
+                return 'binary'
+        #-------这是真正的全精度数据
+        elif strI in ("decimal", "14", "money","numeric"):
+            if dbtype=='sqlite':
+                return 'numeric'
+            elif dbtype=='acc':
+                return 'money'
+            else:
+                return 'decimal'
+
+        #--------------
+        elif strI=="timestamp":
+            if dbtype=='acc':
+                return 'double'
+            else:
+                return 'timestamp'
+            
+        #------自动编号------       
+        elif strI in ("auto", "autocount", "autonumber", "autono", "autoincrement","auto_increment"):
+            if dbtype=='mysql':
+                return 'int NOT NULL auto_increment'
+            elif dbtype=='acc':
+                return 'counter NOT NULL PRIMARY KEY'
+            elif dbtype=='mssql':
+                return 'int identity(1,1)'
+            else:
+                #--sqlite-----------------
+                return "integer PRIMARY KEY AUTOINCREMENT NOT NULL"
+        
+        #--------
+        else:
+            #其余情况，全部识别为 text
+            if dbtype!='acc' and dbtype!='mysql':
+                return 'ntext'
+            else:
+                return 'text'
+
+    except Exception as e:
+        mdbErrString='尝试将各种不同的对数据库字段类型的描述转换为标准字段类型描述时出错:' + str(e) + '\n此函数由【孤荷凌寒】创建qq号是578652607'
+        if isShowMsg==True:
+           msgbox(mdbErrString)
+        #------------------------------------------
+        if dbtype!='acc' and dbtype!='mysql':
+            return 'ntext'
+        else:
+            return 'text'
+    else:
+        pass
+    finally:
+        pass
+        
+
+#-----复制表的操作----------------
+def copyDbTableGhlh(con,strst,strtt,dbtype='acc',strfieldlist='*',strprimarykey='id',strprimarykey2='',isstrprimarykeyautoaccount=False,isstrprimarykey2autoaccount=False,strprimarykeytype='integer',strprimarykey2type='str',iscopydata=False,isDelExitsTable=False,isShowMsg=False):
+    '''
+        此函数在同一数据库内，进行表的复制，可以指定只复制表的结构还是连同表中数据也一起复制。不完美，部分情况下不能成功，特别是要同时复制表中的数据的情况下，有时不会成功。
+        con：数据库连接对象；
+        dbtype：指定数据为的标识：acc(access),mssql,mysql,sqlite；
+        strfieldlist:要从源表中复制哪些列，默认复制全部列。此参数对mysql数据库无效，mysql数据库始终为*即全部字段。
+        strprimarykey：指定复制表完成后，要指定哪个列名为 主键。此参数对Mysql数据库无效。
+        strprimarykey2：指定复制表完成后，要指定的第二个为主键的列名，此参数只对Mssql数据库有效，对其它数据库没有作用。但Mssql数据库也只能在纯复制表结构的情况下使用两个主键列。
+        isstrprimarykeyautoaccount：与上两个参数相关，指定要被 修改为主键的列，是否是一个自动计数 的数据类型的列。对Mysql数据库和mssql数据库无效。
+        isstrprimarykey2autoaccount：与strprimarykey2一样，只对纯复制表结构时的Mssql数据库有效，其它情况下都没有作用。
+        strprimarykeytype：要指定的主键列的数据类型，此参数对mysql和mssql数据库无效；
+        strprimarykey2type：与strprimarykey2一样，只对纯复制表结构时的mssq数据库有效。
+        iscopydata：是否要复制表中的数据，默认不复制，则只复制表的结构。如果此值为True则要复制表数据。
+        isDelExitsTable：：如果要复制的目标表已经存在，则是否要删除旧表，重新复制产生新表，默认是不删除旧表。
+        isShowMsg:是否将错误信息以对话框的形式弹出。
+    '''
+    try:
+        cur=con.cursor()
+        strOnlyTargetTableNm=strtt
+        strOnlySourceTableNm=strst
+        strTemp=''
+        if dbtype!='mysql': #mysql 不支持在sql语句中书写方括号
+            strst='[' + strst + ']'
+            strtt='[' + strtt + ']'
+
+        strprimarykey=strprimarykey.strip()
+        strprimarykey2=strprimarykey2.strip()
+        #如果要复制到的目标 表已经存在 ，应当作一定的处理--------
+        if isTableExistGhlh(con,strtt,isShowMsg)==True:
+            #--如果旧表存在，就看是否要删除旧表---
+            if isDelExitsTable==True:
+                if delTableGhlh(con,strtt,isShowMsg)==False:
+                    #--旧表存在，但是却删除失败的情况----
+                    mdbErrString = "在复制一个数据表时，因为同名的目标表的旧表已经存在了，但尝试删除旧表失败，所以无法复制一个新的目标表。" + '\n此函数由【孤荷凌寒】创建qq：578652607'
+                    if isShowMsg == True:
+                        msgbox(mdbErrString)
+                    return False
+                else:
+                    #成功删除了旧表，那么就添加新表，直接顺序到后面执行代码即可。
+                    pass
+
+            else:
+                #如果旧表存在，但又指定不删除旧表，那么只好结束 本函数 过程了
+                mdbErrString = "在复制一个数据表时，因为同名的目标表的旧表已经存在了，而又指定不能删除旧表，所以无法复制一个新的目标表。" + '\n此函数由【孤荷凌寒】创建qq是578652607'
+                if isShowMsg == True:
+                    msgbox(mdbErrString)
+                return False
+        #--------------------------
+        strSql='SELECT ' + strfieldlist + ' INTO ' + strtt + ' FROM ' + strst
+        if dbtype=='sqlite':
+            strSql='CREATE TABLE ' + strtt + ' AS SELECT ' + strfieldlist + ' FROM ' + strst
+        if iscopydata==False:
+            strSql=strSql + ' WHERE (1=2);'
+        else:
+            if dbtype!='mssql':
+                strSql=strSql + ';'
+            else:
+                if strprimarykey2!='':
+                    #如果mssql数据库要增加两个Key字段，那么，只能先复制结构，再导入数据
+                    strSql=strSql + ' WHERE (1=2);'
+                else:
+                    #如果只增加一个key字段，则不受影响
+                    strSql=strSql + ';'
+        if dbtype!='mysql': 
+            #非Mysql的情况下，开始一步执行到位
+            if dbtype!='sqlite':
+                #在非sqlite数据库的情况下，执行下面的操作
+                cur.execute(strSql) #除Mysql之外的数据库的复制结果都不能得到完整的数据表信息，至少 数据表的 主键信息不会复制过来
+                con.commit()
+                #因此下面必须手动再指定主键信息
+                if strprimarykey!='':
+                    if strprimarykey2=='':
+                        if dbtype=='acc':
+                            #access数据库第一步先删除失败的primary key 字段，
+                            cur.execute('alter table ' + strtt + ' drop COLUMN ' + strprimarykey + ';')
+                            #然后新增一个字段：
+                            strautoaccounter=''
+                            if isstrprimarykeyautoaccount==True:
+                                strautoaccounter=' counter'
+                            else:
+                                strprimarykeytype=getStandardFieldTypeGhlh(strprimarykeytype)
+                                strautoaccounter=' ' + strprimarykeytype   #如果不是自动增加字段，就使用预置的字段类型
+                            cur.execute('alter table ' + strtt + ' add COLUMN ' + strprimarykey + strautoaccounter + ' NOT NULL PRIMARY KEY;')
+                        if dbtype=='mssql':
+                            #mssql的处理也有两步：
+                            #第一步感觉可以取消----
+                            #cur.execute('alter table ' + strtt + ' alter column ' + strprimarykey + ' int not null')
+                            cur.execute('alter table ' + strtt + ' add CONSTRAINT PK_' + strOnlyTargetTableNm + ' PRIMARY KEY NONCLUSTERED ( ' + strprimarykey + ' )')
+                        #----------------------------------------
+                    else:
+                        #---------------------------------------------
+                        #如果有第二个Primarykey
+                        if dbtype=='acc':
+                            #---!!!!!!----access数据库并不适用此方法------------
+                            #access数据库第一步先删除失败的primary key 字段，
+                            cur.execute('alter table ' + strtt + ' drop COLUMN ' + strprimarykey + ',' + strprimarykey2 + ';')
+                            #然后新增一个字段：
+                            strautoaccounter=''
+                            if isstrprimarykeyautoaccount==True:
+                                strautoaccounter=' counter'
+                            else:
+                                strprimarykeytype=getStandardFieldTypeGhlh(strprimarykeytype)
+                                strautoaccounter=' ' + strprimarykeytype   #如果不是自动增加字段，就使用预置的字段类型
+                            #然后增加另一个字段：
+                            strautoaccounter2=''
+                            if isstrprimarykey2autoaccount==True:
+                                strautoaccounter2=' counter'
+                            else:
+                                strprimarykey2type=getStandardFieldTypeGhlh(strprimarykey2type)
+                                strautoaccounter2=' ' + strprimarykey2type   #如果不是自动增加字段，就使用预置的字段类型
+                            #执行---
+                            cur.execute('alter table ' + strtt + ' add COLUMN ' + strprimarykey + strautoaccounter + ' NOT NULL;')  #只能一次设置一个主键，因此默认让第二个字段为主键了
+                            cur.execute('alter table ' + strtt + ' add COLUMN ' + strprimarykey2 + strautoaccounter2 + ' NOT NULL PRIMARY KEY;')
+                        #---------------------------------------------------------
+                        if dbtype=='mssql':
+                            #-！！！！---插入SQL语句失败---------
+                            #mssql的处理也有两步：
+                            strprimarykeytype=getStandardFieldTypeGhlh(strprimarykeytype,'mssql')
+                            strprimarykey2type=getStandardFieldTypeGhlh(strprimarykey2type,'mssql')
+                            #第一步感觉可以取消----
+                            cur.execute('alter table ' + strtt + ' alter column ' + strprimarykey + ' ' + strprimarykeytype + ' not null')
+                            cur.execute('alter table ' + strtt + ' alter column ' + strprimarykey2 + ' ' + strprimarykey2type + ' not null')
+                            cur.execute('alter table ' + strtt + ' add CONSTRAINT PK_' + strOnlyTargetTableNm + ' PRIMARY KEY NONCLUSTERED ( ' + strprimarykey + ',' + strprimarykey2 + ' )')
+                            con.commit()
+                            #如果要求导入数据，此时再导入数据
+                            if iscopydata==True:
+                                #应当先修改源表中指定字段的所有行的值都不为Null 再导入
+
+                                #尝试取出所有列信息：
+                                if strfieldlist=="" or strfieldlist=='*':
+                                    lstTemp=getTableAllFieldToAListGhlh(cur,strOnlySourceTableNm,'mssql')
+                                else:
+                                    lstTemp=strfieldlist.split(',')
+                                #---------------------
+                                lstTemp2=[]
+                                if isstrprimarykeyautoaccount==True:
+                                    lstTemp2.append(strprimarykey)
+                                if isstrprimarykey2autoaccount==True:
+                                    lstTemp2.append(strprimarykey2)
+                                #------------------------
+                                lstTemp=_mty.delListSelYuanSu(lstTemp,lstTemp2)
+                                strT=','.join(lstTemp)
+
+                                #然后导入 #注意myssql的自增加字段不能赋值进去
+                                strS='insert into ' + strOnlyTargetTableNm + '(' + strT + ') select ' + strT + ' from ' + strst + ';'
+                                cur.execute(strS)
+            #---------------------------------------------
+            else:
+                #sqlite数据库的执行比较特殊;
+                cur.execute('PRAGMA table_info([pengwei])') #先取出源表的数据结构的一个列表
+                data=cur.fetchall()
+                strr=''
+                strfieldlist='' #提出源表中的所有字段列表，如果 有自增字段 则书写为null
+                
+                #---下面将源表的创建语句还原成字符串
+                for i in data:
+                    tpl=i
+                    if strr=='':
+                        strr=tpl[1] + ' ' + tpl[2]
+                    else:
+                        strr=strr + ',' + tpl[1] + ' ' + tpl[2]
+                    if tpl[5]>0:
+                        #说明是primarykey
+                        strr=strr + ' PRIMARY KEY'
+                    #---下面对自增字段的处理
+                    if strprimarykey!='': #sqlite只需要检查一个关键字段，它只支持一个Primary key
+                        if tpl[1]==strprimarykey:
+                            if isstrprimarykeyautoaccount==True:
+                                #如果当前字段是自增加字段，那么
+                                strTemp='null' #sqlite的自增加字段不能赋值进去
+                                #给创建表的语句，添加上：
+                                strr=strr + ' AUTOINCREMENT'
+                        else:
+                            strTemp=tpl[1]
+                    else:
+                        strTemp=tpl[1] #当前字段
+                    #取出字段列表----
+                    if strfieldlist=='':
+                        strfieldlist=strTemp
+                    else:
+                        strfieldlist=strfieldlist + ',' + strTemp
+                    #--检查当前字段的约束是否为null
+                    if tpl[3]>0:
+                        #说明是不为null
+                        strr=strr + ' NOT NULL'
+
+                #------------------------------------------------------------------------
+                #----汇总生成的创建表的sql语句-------
+                strr='CREATE TABLE ' + strOnlyTargetTableNm + '(' + strr + ');'
+                #----执行创建表----------
+                cur.execute(strr)
+                con.commit()
+                #---如果要将数据一起复制过来
+                if iscopydata==True:
+                    cur.execute('INSERT INTO ' + strtt + ' SELECT ' + strfieldlist + ' FROM ' + strst + ';')
+
+            #------------------------------
+        else:
+            #mysql的执行比较特殊,分两步完成
+            #第一步复制表的结构，只有mysql是完整复制了数据表的全部信息，包括主键（primary key）的信息
+            cur.execute('CREATE TABLE ' + strtt + ' LIKE ' + strst + ';')
+            #第二步是将源表的数据插入到复制后的新表
+            if iscopydata==True:
+                cur.execute('INSERT INTO ' + strtt + ' SELECT * FROM ' + strst + ';')
+
+        #------下面提交-------------
+        con.commit()
+        return True
+
+    except Exception as e:
+        mdbErrString='尝试在同一数据库中复制数据表时出错:' + str(e) + '\n此函数由【孤荷凌寒】创建qq号是578652607'
+        if isShowMsg==True:
+           msgbox(mdbErrString)
+        return False
+    else:
+        pass
+    finally:
+        try:
+            cur.close()
+        except:
+            pass
+
+#此函数方法将返回一个表的所有字段名称
+def getTableAllFieldToAListGhlh(cur,strtable,dbtype='acc',isShowMsg=False):
+    '''
+    此函数将返回指定的一个表中的所有字段名称组成的一个列表list对象，需要指定数据库类型
+    cur:cursor指针对象
+    strtable：表的名称
+    dbtype：数据库类型
+    isshowmsg:是否显示错误信息对话框
+    '''
+    try:
+        lstR=[]
+        if dbtype=='mssql':
+            cur.execute("Select Name From SysColumns Where id=Object_Id('" + strtable + "')")
+            data=cur.fetchall
+            lstTemp=data() #data是一个函数方法，所以可以直接执行。
+            for i in lstTemp:
+                lstR.append(i[0]) #每一个i对象都是一个元组，因此要取出其中的第0个元素，就是字段名称
+        return lstR
+    except Exception as e:
+        mdbErrString='尝试取出一张数据表中的所有字段名称并返回列表时出错:' + str(e) + '\n此函数由【孤荷凌寒】创建qq号是578652607'
+        if isShowMsg==True:
+           msgbox(mdbErrString)
+        return None
+    else:
+        pass
+    finally:
+        pass
+
+
+
+二、今天只在windows10环境下进行了反复测试：
+证实无论目标表是否已在原数据库中存在，都可根据给函数传递的参数而自动处理。
+具体过程参见本文最后提供的操作过程的录屏记录视频 。
+欢迎并感谢大家能够对函数进行更好的修正，并给予我指导，不胜感激！
+
+原文地址：
+http://www.941xue.com/content.aspx?id=1400 
+本笔记在B站上的视频地址：      https://www.bilibili.com/video/BV1Vt411C7r9/
+Github:
+https://github.com/lhghroom/ZeroBasicSelfStudyPython 
+
+【欢迎大家加入[就是要学]社群】
+如今，这个世界的变化与科技的发展就像一个机器猛兽，它跑得越来越快，跑得越来越快，在我们身后追赶着我们。
+很多人很早就放弃了成长，也就放弃了继续奔跑，多数人保持终身不变的样子，原地不动，成为那猛兽的肚中餐——当然那也不错，在猛兽的逼迫下，机械的重复着自我感觉还良好地稳定工作与生活——而且多半感觉不到这有什么不正常的地方，因为在猛兽肚子里的是大多数人，就好像大多数人都在一个大坑里，也就感觉不出来这是一个大坑了，反而坑外的世界显得有些不大正常。
+为什么我们不要做坑里的大多数人？
+因为真正的人生，应当有百万种可能 ；因为真正的一生可以有好多辈子组成，每一辈子都可以做自己喜欢的事情；因为真正的人生，应当有无数种可以选择的权利，而不是总觉得自己别无选择。因为我们要成为一九法则中为数不多的那个一；因为我们要成为自己人生的导演而不是被迫成为别人安排的戏目中的演员。
+【请注意】
+就是要学社群并不会告诉你怎样一夜暴富！也不会告诉你怎样不经努力就实现梦想！
+【请注意】
+就是要学社群并没有任何可以应付未来一切变化的独门绝技，也没有值得吹嘘的所谓价值连城的成功学方法论！
+【请注意】
+社群只会互相帮助，让每个人都看清自己在哪儿，自己是怎样的，重新看见心中的梦想，唤醒各自内心中的那个英雄，然后勇往直前，成为自己想要成为的样子！
+期待与你并肩奔赴未来！
+www.941xue.com 
+QQ群：646854445 （【就是要学】终身成长）
+ 
+
+
+我的学习过程录像百度盘地址分享如下：（清晰度：1280x720）
+链接：https://pan.baidu.com/s/1iOf11tkYOzMOpkHZ5wxfsg  
+提取码：fsjy
+
+喜马拉雅语音笔记：
+https://www.ximalaya.com/keji/19103006/147520687 
+
+
+

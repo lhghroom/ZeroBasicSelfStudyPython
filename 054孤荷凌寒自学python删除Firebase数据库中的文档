@@ -1,0 +1,153 @@
+孤荷凌寒自学python第五十四天使用python来删除Firebase数据库中的文档
+
+（完整学习过程屏幕记录视频地址在文末）
+
+今天继续研究Firebase数据库，利用google免费提供的这个数据库服务，今天主要尝试使用firebase_admin模块来对firebase数据库进行删除文档操作
+获得成功。
+
+一、简单总结下今天对firebase_admin模块对象的学习
+（一）删除一个文档
+要删除Firebase数据库中的一个集合下的一个文档
+只需要执行文档对象的delete()方法。
+具体用法如下：
+文档对象.delete()
+通过此方法，就可以完全删除这一文档，并且同时文档中的所有字段及记录也都没有了。
+
+（二）删除文档中的某个字段的内容：
+官方的文档是这样说的：
+要从文档中删除特定字段，请在更新文档时使用 FieldValue.delete() 方法。
+但他的示例方法是这样的：
+city_ref = db.collection(u'cities').document(u'BJ')
+city_ref.update({
+    u'capital': firestore.DELETE_FIELD
+})
+可是我在实际测试中，却发现，使用这种方法，直接在：
+firestore.DELETE_FIELD
+这个地方报错！
+提示没有DELETE_FIELD这个对象的存在。
+
+当然我想到了解决方案：
+（1）先get到指定文档的所有记录内容，转换为一个字典（dict）对象
+（2）将字典对象中的要删除的那个字段（Key）键名键值对从字典对象中删除掉。
+（3）重新使用文档对象的set()方法将修改后的字典（dict）对象覆盖写入文档 对象，完成对文档 中指定 字段的删除操作。
+
+（三）删除数据库中的一个集合
+根据官方文档 描述，要删除数据库中的一个集合，只要这个集合中的所有文档 都不复存在 ，则集合就不再存在 了，那么 要删除集合，就是说，只需要通过 循环词句，删除这个集合中的所有文档 就可以了。
+
+
+二、我的测试练习代码
+```
+# _** coding:utf-8 _*_
+# 孤荷凌寒自学Python第五十四天_连接firebase数据库（nosql数据库类型）第二天尝试
+
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import firestore
+
+cred = credentials.Certificate("ghlhfirst.json")
+firebase_admin.initialize_app(cred)
+
+db=firestore.client() #建立连接
+jiheinfo=db.collection(u'ghlh') #得到集合
+doc=jiheinfo.document(u'yiLfGDecALwWYw9VSoIm') #得到文档对象
+info=doc.get() #获取文档内容
+print(u'文档一 data: {}'.format(info.to_dict())) #转变为字典对象后输出
+jihesub=doc.collection(u'subone') #文档下存在的一个子集合   #此处证明，这种数据库中的结构是可以像俄罗斯套娃一样无限循环嵌套的。
+docsub=jihesub.document(u'subonedoc') #子集合中的子文档一
+infosub=docsub.get() #获取子文档一中的内容
+print(u'子文档一 data: {}'.format(infosub.to_dict())) #转变为字典对象后输出
+
+#-----添加文档的方法
+dictdata={
+    u'姓名':u'张四丰',
+    u'性别':u'女',
+    u'年龄':39,
+    u'爱好':
+    {
+        u'书法':u'10级',
+        u'计算机':u'8级',
+        u'英语':u'4级'
+    },
+    u'婚否':False
+}
+#添加一个文档，并写入这些数据记录
+jihesub.document(u'new201812').set(dictdata)
+
+#---将他读出来
+docsub2=jihesub.document(u'new201812') #子集合中的子文档二
+infosub2=docsub2.get() #获取子文档二的内容
+print(u'子文档二data: {}'.format(infosub2.to_dict())) #转变为字典对象后输出
+
+#追加数据到subonedoc这个文档中
+
+#docsub.update(dictdata)
+
+#重新读出追加后的新文档的情况
+#infosub=docsub.get() #获取子文档一中的内容
+#print(u'Document data: {}'.format(infosub.to_dict())) #转变为字典对象后输出
+
+#修改子文档二
+
+#docsub2.update(dictdata)
+
+#删除一个字段
+#操作失败
+
+#重新读
+infosub2=docsub2.get() #获取子文档二的内容
+print(u'子文档二修改后data: {}'.format(infosub2.to_dict())) #转变为字典对象后输出
+```
+#今天专门写的删除指定文档的一个Py文件：
+```
+# _** coding:utf-8 _*_
+# 孤荷凌寒自学Python第五十四天_连接firebase数据库（nosql数据库类型）第五天尝试
+
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import firestore
+
+cred = credentials.Certificate("ghlhfirst.json")
+firebase_admin.initialize_app(cred)
+
+db=firestore.client() #建立连接
+jiheinfo=db.collection(u'ghlh') #得到集合
+doc=jiheinfo.document(u'yiLfGDecALwWYw9VSoIm') #得到文档对象
+jihesub=doc.collection(u'subone') #文档下存在的一个子集合   #此处证明，这种数据库中的结构是可以像俄罗斯套娃一样无限循环嵌套的。
+docsub=jihesub.document(u'subonedoc') #子集合中的子文档一
+
+docsub2=jihesub.document(u'new201812') #子集合中的子文档二
+
+docsub2.delete() #删除这个文档
+```
+
+朋友们，不知不觉，2018年即将过去，在2018年这似乎转瞬即逝的日子里，感恩有你们的支持与陪伴！
+在此向关注本栏目与关心喜马拉雅未来书屋频道的朋友们道一声：新年快乐！祝愿在即将到来的2019年，大家心想事成，开心快乐每一天。
+
+原文地址; 
+http://www.941xue.com/content.aspx?id=1415 
+本笔记在B站上的视频地址：      https://www.bilibili.com/video/BV19t411r7Na/
+Github:
+https://github.com/lhghroom/ZeroBasicSelfStudyPython 
+
+【欢迎大家加入[就是要学]社群】
+如今，这个世界的变化与科技的发展就像一个机器猛兽，它跑得越来越快，跑得越来越快，在我们身后追赶着我们。
+很多人很早就放弃了成长，也就放弃了继续奔跑，多数人保持终身不变的样子，原地不动，成为那猛兽的肚中餐——当然那也不错，在猛兽的逼迫下，机械的重复着自我感觉还良好地稳定工作与生活——而且多半感觉不到这有什么不正常的地方，因为在猛兽肚子里的是大多数人，就好像大多数人都在一个大坑里，也就感觉不出来这是一个大坑了，反而坑外的世界显得有些不大正常。
+为什么我们不要做坑里的大多数人？
+因为真正的人生，应当有百万种可能 ；因为真正的一生可以有好多辈子组成，每一辈子都可以做自己喜欢的事情；因为真正的人生，应当有无数种可以选择的权利，而不是总觉得自己别无选择。因为我们要成为一九法则中为数不多的那个一；因为我们要成为自己人生的导演而不是被迫成为别人安排的戏目中的演员。
+【请注意】
+就是要学社群并不会告诉你怎样一夜暴富！也不会告诉你怎样不经努力就实现梦想！
+【请注意】
+就是要学社群并没有任何可以应付未来一切变化的独门绝技，也没有值得吹嘘的所谓价值连城的成功学方法论！
+【请注意】
+社群只会互相帮助，让每个人都看清自己在哪儿，自己是怎样的，重新看见心中的梦想，唤醒各自内心中的那个英雄，然后勇往直前，成为自己想要成为的样子！
+期待与你并肩奔赴未来！
+www.941xue.com 
+QQ群：646854445 （【就是要学】终身成长）
+ 
+
+
+我的学习过程录像百度盘地址分享如下：（清晰度：1280x720）
+链接：https://pan.baidu.com/s/15-9K_Nncsc91_LDIpKJLVw
+提取码：n9d4 
+
+

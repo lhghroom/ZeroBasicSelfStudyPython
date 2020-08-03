@@ -1,0 +1,89 @@
+孤荷凌寒自学python第五十一天初次尝试使用python连接Firebase数据库
+
+（完整学习过程屏幕记录视频地址在文末）
+
+今天继续研究Firebase数据库，利用google免费提供的这个数据库服务，我构建了一个项目，并得到了一个数据库。
+
+一、简单摸清了Firebase平台对数据库的相关设置
+这儿花了一些时间，也只能说是似懂非懂的状态。
+（具体过程见我操作过程的屏幕录像，链接地址在本文最后）
+
+二、然后尝试用Python来连接所得到的数据库
+根据最初查到的资料，先是使用：
+firebase 模块来连接，这是旧有的连接SDK
+安装比较简单：
+在windows系统中的cmd命令行窗口中，输入以下命令：
+pip install python-firebase
+即可。
+
+然后，开始书写代码：
+# _** coding:utf-8 _*_
+# 孤荷凌寒自学Python第五十一天_连接firebase数据库（nosql数据库类型）第一天尝试
+
+from firebase import firebase
+
+import time
+
+url='https://ghlhfirst.firebaseio.com/'
+
+authentication = firebase.FirebaseAuthentication('旧版数据库的密钥', '578652607@qq.com', True, True)
+firebase.authentication = authentication
+print(authentication.extra)
+user = authentication.get_user()
+print(user.firebase_auth_token)
+
+fdb=firebase.FirebaseApplication(url,authentication = authentication)
+data=fdb.get('/ghlh', '0', params={'print': 'pretty'})
+
+然而发现这种方法无法连接到数据库。
+
+出现错误提示的是最后一行：
+data=fdb.get('/ghlh', '0', params={'print': 'pretty'})
+错误提示为：
+[pylint] E1120:No value for argument 'connection' in method call
+fdb: FirebaseApplication
+
+作为初学者，我没有找到错误的原因，后来经过搜索，发现简书上有专栏作者发布了使用平台推荐的新SDK模块——Firebase Admin SDK
+（作者简书链接：https://www.jianshu.com/p/a62218014493）
+来进行连接数据库的操作。
+就准备放弃这个种旧的连接方法。
+
+三、今天最后安装好了Firebase Admin SDK模块
+安装命令需要在在windows系统中的cmd命令行窗口中，输入以下命令：
+pip install --upgrade firebase-admin
+这个模块的安装就比较漫长了，花了好几分钟才安装完成。
+由于今天的时间不多，所以只能下一天再继续研究新的连接方法了。
+
+原文地址; 
+http://www.941xue.com/content.aspx?id=1412 
+本笔记在B站上的视频地址：      https://www.bilibili.com/video/BV1tt411r7S2/ 
+Github:
+https://github.com/lhghroom/ZeroBasicSelfStudyPython 
+
+【欢迎大家加入[就是要学]社群】
+如今，这个世界的变化与科技的发展就像一个机器猛兽，它跑得越来越快，跑得越来越快，在我们身后追赶着我们。
+很多人很早就放弃了成长，也就放弃了继续奔跑，多数人保持终身不变的样子，原地不动，成为那猛兽的肚中餐——当然那也不错，在猛兽的逼迫下，机械的重复着自我感觉还良好地稳定工作与生活——而且多半感觉不到这有什么不正常的地方，因为在猛兽肚子里的是大多数人，就好像大多数人都在一个大坑里，也就感觉不出来这是一个大坑了，反而坑外的世界显得有些不大正常。
+为什么我们不要做坑里的大多数人？
+因为真正的人生，应当有百万种可能 ；因为真正的一生可以有好多辈子组成，每一辈子都可以做自己喜欢的事情；因为真正的人生，应当有无数种可以选择的权利，而不是总觉得自己别无选择。因为我们要成为一九法则中为数不多的那个一；因为我们要成为自己人生的导演而不是被迫成为别人安排的戏目中的演员。
+【请注意】
+就是要学社群并不会告诉你怎样一夜暴富！也不会告诉你怎样不经努力就实现梦想！
+【请注意】
+就是要学社群并没有任何可以应付未来一切变化的独门绝技，也没有值得吹嘘的所谓价值连城的成功学方法论！
+【请注意】
+社群只会互相帮助，让每个人都看清自己在哪儿，自己是怎样的，重新看见心中的梦想，唤醒各自内心中的那个英雄，然后勇往直前，成为自己想要成为的样子！
+期待与你并肩奔赴未来！
+www.941xue.com 
+QQ群：646854445 （【就是要学】终身成长）
+ 
+
+
+我的学习过程录像百度盘地址分享如下：（清晰度：1280x720）
+链接：https://pan.baidu.com/s/1EzJI4ildO1s8H-1BGYKicQ 
+提取码：7c18 
+
+
+Bilibili:
+https://www.bilibili.com/video/av39162130/ 
+
+喜马拉雅语音笔记：
+https://www.ximalaya.com/keji/19103006/148302989 

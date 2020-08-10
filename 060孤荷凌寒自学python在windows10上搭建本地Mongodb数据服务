@@ -1,0 +1,96 @@
+孤荷凌寒自学python第六十天在windows10上搭建本地Mongodb数据服务
+
+（完整学习过程屏幕记录视频地址在文末）
+
+今天是学习mongoDB数据库的第六天。成功在本地搭建了windows10系统下的mongoDB数据库，并且连接和读写其中的数据初步测试也没有问题，让人重新看到了希望。
+
+一、首先整理一下根据网络搜索的教程来安装windows10系统环境下mongoDB本地包的过程。
+网络上的安装教程很多，不过很多版本都是针对3.0及以前的版本，看上去安装过程将会非常复杂，光是命令行窗口的命令就要输入很多。其实到了mongoDB4.0的安装包，其实已经一点不困难了，在安装界面上一路next就轻松完成，根本不需要后续设置。
+我的安装包名称是：
+mongodb-win32-x86_64-2008plus-ssl-4.0.5-signed.msi
+注意在官方网站下载时选择符合自己操作系统版本的安装包，一定选择msi后缀格式的安装包，这样很省事。
+具体安装过程见我的屏幕操作录像。
+我是参照以下网文操作的：
+https://www.jb51.net/article/145489.htm 
+这篇教程是针对mongoDB4.0版本来进行的，然而注意此教程后续的部分却又在多余的讲解如何指定数据存储位置和日志存储位置，这其实在安装程序的步骤中已经指定了，根本不用再次手动通过命令行指定，除非要手动更改其位置。
+
+也就是说，将安装程序执行完，mongoDB4.0就已经在windows10系统中被设置完成了。可以直接使用了。
+
+二、连接本地MongoDB数据服务与连接远端服务不同
+连接本地MongoDB数据服务的命令比较简单
+只要一个参数就可以了：
+client=MongoClient("localhost")
+显得干净清爽多了。
+
+三、进行连接与读写测试
+from pymongo import MongoClient
+
+import _mty
+import _mf
+import _mre
+import _cl
+
+def msgbox(info,titletext='孤荷凌寒的对话框QQ578652607',style=0,isShowErrMsg=False):
+    return _mty.msgboxGhlh(info,titletext,style,isShowErrMsg)
+
+def thirdConnect():
+    #--指明数据库服务器的地址与端口号：
+    stru=_mf.readAllTextFromTxtFileGhlh('u.txt')
+    strp=_mf.readAllTextFromTxtFileGhlh('p.txt')
+    #strhost='mongodb://' + stru + ':' + strp + '@cluster0-zr7xj.mongodb.net/?authMechanism=SCRAM-SHA-256'
+    #--建立连接
+    #client=MongoClient(strhost,tz_aware=True,connect=True)
+    client=MongoClient("localhost")
+    #-- 获取数据库的命名标识
+
+    #print(client.admin.command('ismaster'))
+
+    db2=client.text
+    #--获取其中的一个集合对象
+    jh=db2.ghlhfirst
+    #msgbox(str(jh.info))
+
+    #--查询这个集合其中的记录 
+    
+    #print(jh.find_one({'x':10}))
+    data=jh.find()
+    for i in data:
+        print(i)
+    #jh.insert({'姓名':'张三'})
+thirdConnect()
+
+今天的读写设置都宣告成功！
+
+
+原文地址; 
+http://www.941xue.com/content.aspx?id=1442
+本笔记在B站上的视频地址：      https://www.bilibili.com/video/BV1ft411x7ub/  
+Github:
+https://github.com/lhghroom/ZeroBasicSelfStudyPython 
+
+【欢迎大家加入[就是要学]社群】
+如今，这个世界的变化与科技的发展就像一个机器猛兽，它跑得越来越快，跑得越来越快，在我们身后追赶着我们。
+很多人很早就放弃了成长，也就放弃了继续奔跑，多数人保持终身不变的样子，原地不动，成为那猛兽的肚中餐——当然那也不错，在猛兽的逼迫下，机械的重复着自我感觉还良好地稳定工作与生活——而且多半感觉不到这有什么不正常的地方，因为在猛兽肚子里的是大多数人，就好像大多数人都在一个大坑里，也就感觉不出来这是一个大坑了，反而坑外的世界显得有些不大正常。
+为什么我们不要做坑里的大多数人？
+因为真正的人生，应当有百万种可能 ；因为真正的一生可以有好多辈子组成，每一辈子都可以做自己喜欢的事情；因为真正的人生，应当有无数种可以选择的权利，而不是总觉得自己别无选择。因为我们要成为一九法则中为数不多的那个一；因为我们要成为自己人生的导演而不是被迫成为别人安排的戏目中的演员。
+【请注意】
+就是要学社群并不会告诉你怎样一夜暴富！也不会告诉你怎样不经努力就实现梦想！
+【请注意】
+就是要学社群并没有任何可以应付未来一切变化的独门绝技，也没有值得吹嘘的所谓价值连城的成功学方法论！
+【请注意】
+社群只会互相帮助，让每个人都看清自己在哪儿，自己是怎样的，重新看见心中的梦想，唤醒各自内心中的那个英雄，然后勇往直前，成为自己想要成为的样子！
+期待与你并肩奔赴未来！
+www.941xue.com 
+QQ群：646854445 （【就是要学】终身成长）
+ 
+
+我的学习过程录像百度盘地址分享如下：（清晰度：1280x720）
+
+链接：https://pan.baidu.com/s/1ioLsscaIkMwFPjbgtKGg8A 
+提取码：tzqp 
+
+Bilibili:
+https://www.bilibili.com/video/av40040985/ 
+
+喜马拉雅语音笔记：
+https://www.ximalaya.com/keji/19103006/ 

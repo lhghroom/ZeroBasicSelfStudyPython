@@ -1,0 +1,119 @@
+孤荷凌寒自学python第五十七天初次尝试使用python来连接远端MongoDb数据库
+
+（完整学习过程屏幕记录视频地址在文末）
+
+今天是学习mongoDB数据库的第三天。感觉这个东西学习起来还是那么困难，今天是第一次尝试使用Python代码来连接远端数据库，然而今天并没有成功。
+
+一、首先下载安装Python需要的第三方库：
+pip install pymongo
+
+在windows的命令行窗口中输入以上命令即可。
+
+二、然后通过引用此模块，就可以进行连接
+我今天的测试如下（没有成功）
+```
+from pymongo import MongoClient
+
+import _mty
+import _mf
+import _mre
+import _cl
+
+def msgbox(info,titletext='孤荷凌寒的对话框QQ578652607',style=0,isShowErrMsg=False):
+    return _mty.msgboxGhlh(info,titletext,style,isShowErrMsg)
+
+def firstConnect():
+    #--指明数据库服务器的地址与端口号：
+    strhost='cluster0-zr7xj.mongodb.net'
+    intport=27017
+    #--建立连接
+    client=MongoClient(strhost)
+    #--获取连接中的数据库（通过数据库的命名空间获取）
+    db=client['admin']
+    #-- 准备当前命名空间对应的数据库的权限用户名和对应授权密码
+    stru=_mf.readAllTextFromTxtFileGhlh('u.txt')
+    strp=_mf.readAllTextFromTxtFileGhlh('p.txt')
+    db2=client['ghlhfirst']
+    #--登录数据库
+    db2.authenticate(stru,strp)
+    #--获取其中的一个集合对象
+    jh=db2['ghlhone']
+    #--获取其中的文档 
+    #--获取全部文档
+    docall=jh.find()
+    msgbox(str(docall))
+
+firstConnect()
+
+```
+运行报错：
+Traceback (most recent call last):
+  File "i:\MAKEAPP\python\Python365\边学习边测试文件夹\自学PYTHON部分\0057第五十七天访问mongodb数据库3\trymongodbfirst.py", line 34, in <module>
+    firstConnect()
+  File "i:\MAKEAPP\python\Python365\边学习边测试文件夹\自学PYTHON部分\0057第五十七天访问mongodb数据库3\trymongodbfirst.py", line 26, in firstConnect
+    db2.authenticate(stru,strp,mechanism='MONGODB-CR')
+  File "G:\w10_1\python\python365\lib\site-packages\pymongo\database.py", line 1274, in authenticate
+    connect=True)
+  File "G:\w10_1\python\python365\lib\site-packages\pymongo\mongo_client.py", line 609, in _cache_credentials
+    writable_preferred_server_selector)
+  File "G:\w10_1\python\python365\lib\site-packages\pymongo\topology.py", line 224, in select_server
+    address))
+  File "G:\w10_1\python\python365\lib\site-packages\pymongo\topology.py", line 183, in select_servers
+    selector, server_timeout, address)
+  File "G:\w10_1\python\python365\lib\site-packages\pymongo\topology.py", line 199, in _select_servers_loop
+    self._error_message(selector))
+pymongo.errors.ServerSelectionTimeoutError: cluster0-zr7xj.mongodb.net:27017: [Errno 11001] getaddrinfo failed
+PS I:\MAKEAPP\python\Python365\边学习边测试文件夹\自学PYTHON部分\0057第五十七天访问mongodb数据库3> cd 'i:\MAKEAPP\python\Python365\边学习边测试文件夹\自学PYTHON部分\0057第五十七天访问mongodb数据库3'; ${env:PYTHONIOENCODING}='UTF-8'; ${env:PYTHONUNBUFFERED}='1'; & 'G:\w10_1\python\python365\python.exe' 'c:\Users\pw\.vscode\extensions\ms-python.python-2018.7.1\pythonFiles\PythonTools\visualstudio_py_launcher.py' 'i:\MAKEAPP\python\Python365\边学习边测试文件夹\自学PYTHON部分\0057第五十七天访问mongodb数据库3' '56500' '34806ad9-833a-4524-8cd6-18ca4aa74f14' 'RedirectOutput,RedirectOutput' 'i:\MAKEAPP\python\Python365\边学习边测试文件夹\自学PYTHON部分\0057第五十七天
+访问mongodb数据库3\trymongodbfirst.py'
+Traceback (most recent call last):
+  File "i:\MAKEAPP\python\Python365\边学习边测试文件夹\自学PYTHON部分\0057第五十七天访问mongodb数据库3\trymongodbfirst.py", line 34, in <module>
+    firstConnect()
+  File "i:\MAKEAPP\python\Python365\边学习边测试文件夹\自学PYTHON部分\0057第五十七天访问mongodb数据库3\trymongodbfirst.py", line 26, in firstConnect
+    db2.authenticate(stru,strp)
+  File "G:\w10_1\python\python365\lib\site-packages\pymongo\database.py", line 1274, in authenticate
+    connect=True)
+  File "G:\w10_1\python\python365\lib\site-packages\pymongo\mongo_client.py", line 609, in _cache_credentials
+    writable_preferred_server_selector)
+  File "G:\w10_1\python\python365\lib\site-packages\pymongo\topology.py", line 224, in select_server
+    address))
+  File "G:\w10_1\python\python365\lib\site-packages\pymongo\topology.py", line 183, in select_servers
+    selector, server_timeout, address)
+  File "G:\w10_1\python\python365\lib\site-packages\pymongo\topology.py", line 199, in _select_servers_loop
+    self._error_message(selector))
+pymongo.errors.ServerSelectionTimeoutError: cluster0-zr7xj.mongodb.net:27017: [Errno 11001] getaddrinfo failed
+经过近一个小时反复搜索查找资料，还是没有成功，而同样的情况下，通过compass客户端却能够连接上。
+因为学习时间有限，今天的学习只能搁到这儿，还恳请高手能够指点迷津，万分感激。
+
+原文地址; 
+http://www.941xue.com/content.aspx?id=1438
+本笔记在B站上的视频地址：      https://www.bilibili.com/video/BV1kt411B7aS/
+Github:
+https://github.com/lhghroom/ZeroBasicSelfStudyPython 
+
+【欢迎大家加入[就是要学]社群】
+如今，这个世界的变化与科技的发展就像一个机器猛兽，它跑得越来越快，跑得越来越快，在我们身后追赶着我们。
+很多人很早就放弃了成长，也就放弃了继续奔跑，多数人保持终身不变的样子，原地不动，成为那猛兽的肚中餐——当然那也不错，在猛兽的逼迫下，机械的重复着自我感觉还良好地稳定工作与生活——而且多半感觉不到这有什么不正常的地方，因为在猛兽肚子里的是大多数人，就好像大多数人都在一个大坑里，也就感觉不出来这是一个大坑了，反而坑外的世界显得有些不大正常。
+为什么我们不要做坑里的大多数人？
+因为真正的人生，应当有百万种可能 ；因为真正的一生可以有好多辈子组成，每一辈子都可以做自己喜欢的事情；因为真正的人生，应当有无数种可以选择的权利，而不是总觉得自己别无选择。因为我们要成为一九法则中为数不多的那个一；因为我们要成为自己人生的导演而不是被迫成为别人安排的戏目中的演员。
+【请注意】
+就是要学社群并不会告诉你怎样一夜暴富！也不会告诉你怎样不经努力就实现梦想！
+【请注意】
+就是要学社群并没有任何可以应付未来一切变化的独门绝技，也没有值得吹嘘的所谓价值连城的成功学方法论！
+【请注意】
+社群只会互相帮助，让每个人都看清自己在哪儿，自己是怎样的，重新看见心中的梦想，唤醒各自内心中的那个英雄，然后勇往直前，成为自己想要成为的样子！
+期待与你并肩奔赴未来！
+www.941xue.com 
+QQ群：646854445 （【就是要学】终身成长）
+ 
+
+我的学习过程录像百度盘地址分享如下：（清晰度：1280x720）
+
+链接：https://pan.baidu.com/s/1DSXmIRCkyW05R9viASFWYw 
+提取码：e1we 
+
+Bilibili:
+https://www.bilibili.com/video/av39710633/
+ 
+喜马拉雅语音笔记：
+https://www.ximalaya.com/keji/19103006/149864154 
+

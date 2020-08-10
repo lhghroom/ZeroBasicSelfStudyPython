@@ -1,0 +1,248 @@
+孤荷凌寒自学python第五十九天尝试使用python来读访问远端MongoDb数据服务
+
+（完整学习过程屏幕记录视频地址在文末）
+
+今天是学习mongoDB数据库的第五天。今天的感觉是，mongoDB数据库我似乎根本就很难掌控呵！
+
+一、首先系统学习了读写mongoDB数据库的方法
+以下笔记来自官方文档整理：
+（官方文档：https://api.mongodb.com/python/current/index.html ）
+（一）指定数据库
+MongoDB中还分为一个个数据库，我们接下来的一步就是指定要操作哪个数据库，在这里我以test数据库为例进行说明，所以下一步我们需要在程序中指定要使用的数据库。
+db = client.test
+调用client的test属性即可返回test数据库，当然也可以这样来指定：
+db = client['test']
+两种方式是等价的。
+（二）指定集合
+MongoDB的每个数据库又包含了许多集合Collection，也就类似与关系型数据库中的表，下一步我们需要指定要操作的集合，在这里我们指定一个集合名称为students，学生集合。还是和指定数据库类似，指定集合也有两种方式。
+collection = db.students
+#collection = db['students']
+
+（三）插入数据
+接下来我们便可以进行数据插入了，对于students这个Collection，我们新建一条学生数据，以字典的形式表示：
+student = {
+ 'id': '20170101',
+ 'name': 'Jordan',
+ 'age': 20,
+ 'gender': 'male'
+}
+
+在这里我们指定了学生的学号、姓名、年龄和性别，然后接下来直接调用collection的insert()方法即可插入数据。
+
+result = collection.insert(student)
+print(result)
+ 
+在MongoDB中，每条数据其实都有一个_id属性来唯一标识，如果没有显式指明_id，MongoDB会自动产生一个ObjectId类型的_id属性。insert()方法会在执行后返回的_id值。
+
+运行结果：
+
+5932a68615c2606814c91f3d
+ 
+当然我们也可以同时插入多条数据，只需要以列表形式传递即可，示例如下：
+
+student1 = {
+ 'id': '20170101',
+ 'name': 'Jordan',
+ 'age': 20,
+ 'gender': 'male'
+}
+ 
+student2 = {
+ 'id': '20170202',
+ 'name': 'Mike',
+ 'age': 21,
+ 'gender': 'male'
+}
+ 
+result = collection.insert([student1, student2])
+print(result)
+ 
+返回的结果是对应的_id的集合，运行结果：
+
+[ObjectId('5932a80115c2606a59e8a048'), ObjectId('5932a80115c2606a59e8a049')]
+ 
+实际上在PyMongo 3.X版本中，insert()方法官方已经不推荐使用了，当然继续使用也没有什么问题，官方推荐使用insert_one()和insert_many()方法将插入单条和多条记录分开。
+student = {
+ 'id': '20170101',
+ 'name': 'Jordan',
+ 'age': 20,
+ 'gender': 'male'
+}
+ 
+result = collection.insert_one(student)
+print(result)
+print(result.inserted_id)
+ 
+运行结果：
+<pymongo.results.InsertOneResult object at 0x10d68b558>
+5932ab0f15c2606f0c1cf6c5
+ 
+返回结果和insert()方法不同，这次返回的是InsertOneResult对象，我们可以调用其inserted_id属性获取_id。
+
+对于insert_many()方法，我们可以将数据以列表形式传递即可，示例如下：
+
+student1 = {
+ 'id': '20170101',
+ 'name': 'Jordan',
+ 'age': 20,
+ 'gender': 'male'
+}
+ 
+student2 = {
+ 'id': '20170202',
+ 'name': 'Mike',
+ 'age': 21,
+ 'gender': 'male'
+}
+ 
+result = collection.insert_many([student1, student2])
+print(result)
+print(result.inserted_ids)
+ 
+insert_many()方法返回的类型是InsertManyResult，调用inserted_ids属性可以获取插入数据的_id列表，运行结果：
+
+<pymongo.results.InsertManyResult object at 0x101dea558>
+[ObjectId('5932abf415c2607083d3b2ac'), ObjectId('5932abf415c2607083d3b2ad')]
+ 
+（四）查询记录
+
+插入数据后我们可以利用find_one()或find()方法进行查询，find_one()查询得到是单个结果，find()则返回多个结果。
+result = collection.find_one({'name': 'Mike'})
+print(type(result))
+print(result)
+ 
+在这里我们查询name为Mike的数据，它的返回结果是字典类型，运行结果：
+<class 'dict'>
+{'_id': ObjectId('5932a80115c2606a59e8a049'), 'id': '20170202', 'name': 'Mike', 'age': 21, 'gender': 'male'}
+ 
+可以发现它多了一个_id属性，这就是MongoDB在插入的过程中自动添加的。
+
+我们也可以直接根据ObjectId来查询，这里需要使用bson库里面的ObjectId。
+
+from bson.objectid import ObjectId
+ 
+result = collection.find_one({'_id': ObjectId('593278c115c2602667ec6bae')})
+print(result)
+ 
+其查询结果依然是字典类型，运行结果：
+{'_id': ObjectId('593278c115c2602667ec6bae'), 'id': '20170101', 'name': 'Jordan', 'age': 20, 'gender': 'male'}
+ 
+当然如果查询结果不存在则会返回None。
+
+对于多条数据的查询，我们可以使用find()方法，例如在这里查找年龄为20的数据，示例如下：
+results = collection.find({'age': 20})
+print(results)
+for result in results:
+ print(result)
+ 
+运行结果：
+
+<pymongo.cursor.Cursor object at 0x1032d5128>
+{'_id': ObjectId('593278c115c2602667ec6bae'), 'id': '20170101', 'name': 'Jordan', 'age': 20, 'gender': 'male'}
+{'_id': ObjectId('593278c815c2602678bb2b8d'), 'id': '20170102', 'name': 'Kevin', 'age': 20, 'gender': 'male'}
+{'_id': ObjectId('593278d815c260269d7645a8'), 'id': '20170103', 'name': 'Harden', 'age': 20, 'gender': 'male'}
+ 
+返回结果是Cursor类型，相当于一个生成器，我们需要遍历取到所有的结果，每一个结果都是字典类型。
+
+如果要查询年龄大于20的数据，则写法如下：
+
+results = collection.find({'age': {'$gt': 20}})
+
+在这里查询的条件键值已经不是单纯的数字了，而是一个字典，其键名为比较符号$gt，意思是大于，键值为20，这样便可以查询出所有年龄大于20的数据。
+比较符号的含义归纳：
+$lt 小于 示例：{'age': {'$lt': 20}} 
+$gt 大于 示例：{'age': {'$gt': 20}} 
+$lte 小于等于 示例：{'age': {'$lte': 20}} 
+$gte 大于等于 示例： {'age': {'$gte': 20}} 
+$ne 不等于 示例： {'age': {'$ne': 20}} 
+$in 在范围内 示例： {'age': {'$in': [20, 23]}} 
+$nin 不在范围内 示例：{'age': {'$nin': [20, 23]}}
+
+二、根据上面的系统学习，感觉很轻松搞定，于是开始测试
+```
+from pymongo import MongoClient
+
+import _mty
+import _mf
+import _mre
+import _cl
+
+def msgbox(info,titletext='孤荷凌寒的对话框QQ578652607',style=0,isShowErrMsg=False):
+    return _mty.msgboxGhlh(info,titletext,style,isShowErrMsg)
+
+def secondConnect():
+    #--指明数据库服务器的地址与端口号：
+    stru=_mf.readAllTextFromTxtFileGhlh('u.txt')
+    strp=_mf.readAllTextFromTxtFileGhlh('p.txt')
+    strhost='mongodb://' + stru + ':' + strp + '@cluster0-zr7xj.mongodb.net/?authMechanism=SCRAM-SHA-256'
+    #--建立连接
+    client=MongoClient(strhost,tz_aware=True,connect=True)
+    #client=MongoClient("cluster0-zr7xj.mongodb.net",username=stru,password=strp,authMechanism='SCRAM-SHA-256',connect=False)
+    #-- 获取数据库的命名标识
+
+    #print(client.admin.command('ismaster'))
+
+    db2=client.ghlhfirst
+    #--获取其中的一个集合对象
+    jh=db2.ghlhone
+    #msgbox(str(jh.info))
+
+    #--查询这个集合其中的记录 
+    
+    print(jh.find_one({"姓名":"张三"}))
+
+secondConnect()
+```
+每次前面都执行正常，总是到了：
+print(jh.find_one({"姓名":"张三"}))
+这句时要等大概一分钟，然后报错：
+pymongo.errors.ServerSelectionTimeoutError: cluster0-zr7xj.mongodb.net:27017: [Errno 11001] getaddrinfo failed
+
+于是我就开始不停的搜索，前后花了至少3个多小时，反复测试，到底为什么连接上了却不能读出（查询）出任何内容来呢，真的弄得自己筋疲力尽。
+
+后来想到是不是一开始就没有连接上呢？
+经过认真思考，发现还真的是一开始就没有连接上MongoDB的远端服务器，这才明白昨天并没有根本上解决问题！！
+真是个莫大的乌龙！
+原来前面的语句只是将连接信息等存储起来罢了（详细见Mongo_Client.py文件（就是Pip安装的那个pymongodb模块中的文件））
+直到：
+jh.find_one({"姓名":"张三"})
+这一语句时才真正去连接服务器，这就是为什么这个语句要执行等待一分钟左右才最终报错的原因。真是个大坑。
+
+这意味着，mongoDB远端服务器其实根本就没有被连接上，始终没有解决问题。
+决定明天只好开始布置本地MongoDB数据库服务了。
+
+
+因为学习时间有限，今天的学习只能搁到这儿，还恳请高手能够指点迷津，万分感激。
+
+原文地址; 
+http://www.941xue.com/content.aspx?id=1416 
+本笔记在B站上的视频地址：      https://www.bilibili.com/video/BV19t411r7NN/  
+Github:
+https://github.com/lhghroom/ZeroBasicSelfStudyPython 
+
+【欢迎大家加入[就是要学]社群】
+如今，这个世界的变化与科技的发展就像一个机器猛兽，它跑得越来越快，跑得越来越快，在我们身后追赶着我们。
+很多人很早就放弃了成长，也就放弃了继续奔跑，多数人保持终身不变的样子，原地不动，成为那猛兽的肚中餐——当然那也不错，在猛兽的逼迫下，机械的重复着自我感觉还良好地稳定工作与生活——而且多半感觉不到这有什么不正常的地方，因为在猛兽肚子里的是大多数人，就好像大多数人都在一个大坑里，也就感觉不出来这是一个大坑了，反而坑外的世界显得有些不大正常。
+为什么我们不要做坑里的大多数人？
+因为真正的人生，应当有百万种可能 ；因为真正的一生可以有好多辈子组成，每一辈子都可以做自己喜欢的事情；因为真正的人生，应当有无数种可以选择的权利，而不是总觉得自己别无选择。因为我们要成为一九法则中为数不多的那个一；因为我们要成为自己人生的导演而不是被迫成为别人安排的戏目中的演员。
+【请注意】
+就是要学社群并不会告诉你怎样一夜暴富！也不会告诉你怎样不经努力就实现梦想！
+【请注意】
+就是要学社群并没有任何可以应付未来一切变化的独门绝技，也没有值得吹嘘的所谓价值连城的成功学方法论！
+【请注意】
+社群只会互相帮助，让每个人都看清自己在哪儿，自己是怎样的，重新看见心中的梦想，唤醒各自内心中的那个英雄，然后勇往直前，成为自己想要成为的样子！
+期待与你并肩奔赴未来！
+www.941xue.com 
+QQ群：646854445 （【就是要学】终身成长）
+ 
+
+我的学习过程录像百度盘地址分享如下：（清晰度：1280x720）
+
+链接：https://pan.baidu.com/s/1pxsntZ5bMRs1vr9uHSW7Fg 
+提取码：u6mu 
+
+喜马拉雅语音笔记：
+https://www.ximalaya.com/keji/19103006/150385573
+
+bilibili:
+https://www.bilibili.com/video/av39921964/ 

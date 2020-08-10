@@ -1,0 +1,123 @@
+孤荷凌寒自学python第五十六天通过compass客户端和mongodb shell命令来连接远端MongoDb数据库
+
+（完整学习过程屏幕记录视频地址在文末）
+
+今天是学习mongoDB数据库的第二天。仍然感觉付出的时间与收获完全不成正比，万事开头的时候，总是那么困难，不过今天历尽困难总算还是成功在本地连接上了远端的mongoDB数据库（就是我注册的官方的试用版本的数据库，就在官方网站服务器上。）
+
+一、首先在官方网站为我注册的账号新建的项目【Clusters0】中添加了一个测试数据库（database），命名空间为：ghlhfirst
+(具体添加过程不是很复杂，但要通过文字描述又比较有难度，而且最开始要找到这个添加过程还着实花了我不少时间，具体看我的操作录屏，链接在文末)
+同样的，我可以很方便的在这个数据库中，添加一个集合，我命名为【ghlhone】
+与firebase一样在集合中，我可以添加多个文档（document）对象。在文档中我也可以添加记录，一个文档的记录可以由多个字典样式的key:value格式组合的成的内容。这些都与之前学习的firebase数据库一模一样。
+但今天没有研究在文档（document）中是否还可以添加下一层级的集合。
+（具体看我的操作录屏，链接在文末）
+
+二、然后是下载安装compass本地客户端
+下载后的compass本地客户端的文件名是：
+mongodb-compass-community-1.16.3-win32-x64.exe
+直接点击安装，允许杀毒软件放行即可安装完成，桌面上会有快捷方式，而且安装过程非常快，可能只花了几秒钟时间，然而下载这个文件要花不少时间，受制于网络的影响。
+
+客户端的使用我找到了几个网络上的教程：
+一个是官方教程：
+https://resources.mongodb.com/getting-started-with-mongodb/getting-started-with-python-and-mongodb 
+一个是百度经验上有同修者放有经验：
+https://jingyan.baidu.com/article/f96699bb0bb760894f3c1b63.html 
+
+我严格参照此教程进行连接，反复尝试。
+然而，却屡屡失败，反复提示：
+Cannot reach any nodes for set Cluster0-shard-0. Please check network connectivity and the status of the set.
+
+对compass起始界面上的参数也进行了反复的修改，不断尝试，花了近几个小时，然而还是不能连接上。
+（我的详细操作过程，参见我的屏幕录屏，因为反复尝试次数过多，进行了剪辑，显得没有尝试几次，事实上进行了数百次的尝试。）
+
+就暂时放弃了，转而研究它的命令行客户端【Mongo Shell】
+这种通过windows的命令行客户端连接远程服务器的方法。
+
+三、又尝试进行命令行客户端【Mongo Shell】的安装并连接
+（一）、首先下载了这个客户端，下载得到的文件是：
+mongodb-shell-win32-x86_64-2008plus-ssl-4.0.4.zip
+因为是zip格式的压缩文件，看来不用安装 ，于是我解压了它，只得到了一个文件：
+mongo.exe
+此处与上面提到的百度经验中的经验文章中的教程都不再一致了，我只好进行尝试，将这个文件放到了系统盘的windows目录中，然而打开windows的命令行窗口进行验证安装是否成功：
+输入的命令是：
+C:\Users\pw>mongo --version
+MongoDB shell version v4.0.4
+git version: f288a3bdf201007f3693c58e140056adf8b04839
+allocator: tcmalloc
+modules: none
+build environment:
+    distmod: 2008plus-ssl
+    distarch: x86_64
+    target_arch: x86_64
+
+
+根据显示的内容来看，居然可以成功执行，当然此处也有可能是我之前已经安装了compass客户端，所以本来就已经安装了了shell版本的客户端。
+
+（二）然后我找到了我的shell版本的连接字符命令行命令：
+mongo "mongodb+srv://cluster0-zr7xj.mongodb.net/test" --username ghlh
+
+考虑到我自己建立的第一个数据库的命名空间是：【ghlhfirst】
+于是我将其修改为再到windows的cmd命令中去执行如下：
+mongo "mongodb+srv://cluster0-zr7xj.mongodb.net/ghlhfirst" --username ghlh
+不料出现与compass客户端同样的问题：
+Cannot reach any nodes for set Cluster0-shard-0. Please check network connectivity and the status of the set.
+在此又花了大量时间，终于后来明白了，是网络访问受阻，经过反复测试，花去大量宝贵的时间之后，终于在shell命令下连接上了：
+C:\Users\pw>mongo "mongodb+srv://cluster0-zr7xj.mongodb.net/ghlhfirst" --username ghlh
+MongoDB shell version v4.0.4
+Enter password:
+connecting to: mongodb+srv://cluster0-zr7xj.mongodb.net/ghlhfirst
+2019-01-01T17:38:59.961+0800 I NETWORK  [js] Starting new replica set monitor for Cluster0-shard-0/cluster0-shard-00-00-zr7xj.mongodb.net.:27017,cluster0-shard-00-01-zr7xj.mongodb.net.:27017,cluster0-shard-00-02-zr7xj.mongodb.net.:27017
+2019-01-01T17:39:01.002+0800 I NETWORK  [js] Successfully connected to cluster0-shard-00-00-zr7xj.mongodb.net.:27017 (1 connections now open to cluster0-shard-00-00-zr7xj.mongodb.net.:27017 with a 5 second timeout)
+2019-01-01T17:39:01.034+0800 I NETWORK  [ReplicaSetMonitor-TaskExecutor] Successfully connected to cluster0-shard-00-01-zr7xj.mongodb.net.:27017 (1 connections now open to cluster0-shard-00-01-zr7xj.mongodb.net.:27017 with a 5 second timeout)
+2019-01-01T17:39:01.243+0800 I NETWORK  [js] changing hosts to Cluster0-shard-0/cluster0-shard-00-00-zr7xj.mongodb.net:27017,cluster0-shard-00-01-zr7xj.mongodb.net:27017,cluster0-shard-00-02-zr7xj.mongodb.net:27017 from Cluster0-shard-0/cluster0-shard-00-00-zr7xj.mongodb.net.:27017,cluster0-shard-00-01-zr7xj.mongodb.net.:27017,cluster0-shard-00-02-zr7xj.mongodb.net.:27017
+2019-01-01T17:39:02.266+0800 I NETWORK  [js] Successfully connected to cluster0-shard-00-00-zr7xj.mongodb.net:27017 (1 connections now open to cluster0-shard-00-00-zr7xj.mongodb.net:27017 with a 5 second timeout)
+Implicit session: session { "id" : UUID("54f31aff-fe89-4189-b68e-c637916bd71b") }
+MongoDB server version: 4.0.4
+Error while trying to show server startup warnings: user is not allowed to do action [getLog] on [admin.]
+MongoDB Enterprise Cluster0-shard-0:PRIMARY>
+然后证实通过compass客户端也可以连接上了。
+
+三、对mongoDB连接命令的理解：
+（一）
+"mongodb+srv://cluster0-zr7xj.mongodb.net/ghlhfirst"
+命令参数的第一部分其实是自己的数据库的地址，一个域名的形式。
+（二）
+--username ghlh
+表示：当前连接数据库的授权用户名
+
+而授权用户对应的密码，会在cmd命令窗口中，单独提示输入。
+输入密码是不会有任何字符显示的，只管输入完成后点击【Enter】即可。
+
+由于今天花费了太多时间与服务器访问上，还没有进行Python语句连接到mongoDB的测试。
+
+原文地址; 
+http://www.941xue.com/content.aspx?id=1437 
+本笔记在B站上的视频地址：      https://www.bilibili.com/video/BV1et411B7H4/
+Github:
+https://github.com/lhghroom/ZeroBasicSelfStudyPython 
+
+【欢迎大家加入[就是要学]社群】
+如今，这个世界的变化与科技的发展就像一个机器猛兽，它跑得越来越快，跑得越来越快，在我们身后追赶着我们。
+很多人很早就放弃了成长，也就放弃了继续奔跑，多数人保持终身不变的样子，原地不动，成为那猛兽的肚中餐——当然那也不错，在猛兽的逼迫下，机械的重复着自我感觉还良好地稳定工作与生活——而且多半感觉不到这有什么不正常的地方，因为在猛兽肚子里的是大多数人，就好像大多数人都在一个大坑里，也就感觉不出来这是一个大坑了，反而坑外的世界显得有些不大正常。
+为什么我们不要做坑里的大多数人？
+因为真正的人生，应当有百万种可能 ；因为真正的一生可以有好多辈子组成，每一辈子都可以做自己喜欢的事情；因为真正的人生，应当有无数种可以选择的权利，而不是总觉得自己别无选择。因为我们要成为一九法则中为数不多的那个一；因为我们要成为自己人生的导演而不是被迫成为别人安排的戏目中的演员。
+【请注意】
+就是要学社群并不会告诉你怎样一夜暴富！也不会告诉你怎样不经努力就实现梦想！
+【请注意】
+就是要学社群并没有任何可以应付未来一切变化的独门绝技，也没有值得吹嘘的所谓价值连城的成功学方法论！
+【请注意】
+社群只会互相帮助，让每个人都看清自己在哪儿，自己是怎样的，重新看见心中的梦想，唤醒各自内心中的那个英雄，然后勇往直前，成为自己想要成为的样子！
+期待与你并肩奔赴未来！
+www.941xue.com 
+QQ群：646854445 （【就是要学】终身成长）
+ 
+
+我的学习过程录像百度盘地址分享如下：（清晰度：1280x720）
+
+链接：https://pan.baidu.com/s/1vuDr039cVG0Mj0zsFv5gCg 
+提取码：e6tp 
+
+Bilibili:
+https://www.bilibili.com/video/av39680803/
+
+喜马拉雅语音笔记：
+https://www.ximalaya.com/keji/19103006/149597379 
